@@ -9,3 +9,5 @@ public/
 
 # Node (only if tooling is added later)
 node_modules/
+.vercel
+.env*.local

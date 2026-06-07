@@ -1329,6 +1329,16 @@
         flex-shrink: 0;
       }
 
+      /* Honeypot — hidden from humans, bait for bots. */
+      .hp {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
       /* ============ FOOTER ============ */
       footer {
         position: relative;
@@ -1602,14 +1612,15 @@
               Partner with NeuroCraft, request access to a product, or just say hello.
             </p>
           </div>
-          <form
-            class="cta-form reveal reveal-delay-2"
-            onsubmit="
-              event.preventDefault()
-              this.querySelector('button').textContent = 'SENT ✓'
-              this.querySelector('button').style.background = '#28c840'
-            "
-          >
+          <form class="cta-form reveal reveal-delay-2" data-lead="contact">
+            <input
+              type="text"
+              class="hp"
+              name="company"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+            />
             <input type="email" class="cta-input" placeholder="your@email.com" required />
             <button type="submit" class="btn-primary">Get in Touch</button>
           </form>
@@ -2015,14 +2026,15 @@
               organization.
             </p>
           </div>
-          <form
-            class="cta-form reveal reveal-delay-2"
-            onsubmit="
-              event.preventDefault()
-              this.querySelector('button').textContent = 'REQUESTED ✓'
-              this.querySelector('button').style.background = '#28c840'
-            "
-          >
+          <form class="cta-form reveal reveal-delay-2" data-lead="dovira-access">
+            <input
+              type="text"
+              class="hp"
+              name="company"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+            />
             <input type="email" class="cta-input" placeholder="your@email.com" required />
             <button type="submit" class="btn-primary">Request Access</button>
           </form>
@@ -2234,14 +2246,15 @@
               competition.
             </p>
           </div>
-          <form
-            class="cta-form reveal reveal-delay-2"
-            onsubmit="
-              event.preventDefault()
-              this.querySelector('button').textContent = 'REQUESTED ✓'
-              this.querySelector('button').style.background = '#28c840'
-            "
-          >
+          <form class="cta-form reveal reveal-delay-2" data-lead="dronesim-access">
+            <input
+              type="text"
+              class="hp"
+              name="company"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+            />
             <input type="email" class="cta-input" placeholder="your@email.com" required />
             <button type="submit" class="btn-primary">Request Access</button>
           </form>
@@ -2430,6 +2443,50 @@
         requestAnimationFrame(() =>
           document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
         )
+      })
+
+      // ============ LEAD FORMS -> /api/contact (Resend email) ============
+      const LEAD_SUCCESS = {
+        contact: 'SENT ✓',
+        'dovira-access': 'REQUESTED ✓',
+        'dronesim-access': 'REQUESTED ✓',
+      }
+
+      document.addEventListener('submit', async (e) => {
+        const form = e.target.closest('form[data-lead]')
+        if (!form) return
+        e.preventDefault()
+
+        const type = form.dataset.lead
+        const btn = form.querySelector('button')
+        const emailInput = form.querySelector('input[type="email"]')
+        const honeypot = form.querySelector('.hp')
+        const original = btn.textContent
+
+        btn.disabled = true
+        btn.textContent = 'SENDING…'
+
+        try {
+          const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: emailInput.value.trim(),
+              type,
+              company: honeypot ? honeypot.value : '',
+            }),
+          })
+          if (!res.ok) throw new Error('Request failed')
+          btn.textContent = LEAD_SUCCESS[type] || 'SENT ✓'
+          btn.style.background = '#28c840'
+          emailInput.value = ''
+        } catch {
+          btn.disabled = false
+          btn.textContent = 'TRY AGAIN'
+          setTimeout(() => {
+            btn.textContent = original
+          }, 2500)
+        }
       })
 
       route()

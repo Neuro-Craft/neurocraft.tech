@@ -19,6 +19,25 @@ Open `src/index.html` and, in the inline `<script>`:
 2. Add a matching entry to `THEMES` (accent color set + page title).
 3. Copy a `<section class="view" data-view="…">` block and fill in the content.
 
+## Contact forms (email)
+
+The three forms (Get in Touch + two Request Access) POST to a Vercel serverless
+function at `api/contact.js`, which emails each submission via [Resend](https://resend.com).
+
+Set these environment variables in the Vercel project (Settings → Environment Variables):
+
+| Variable | Required | Default | Notes |
+| --- | --- | --- | --- |
+| `RESEND_API_KEY` | yes | — | Your Resend API key. |
+| `CONTACT_TO` | no | `dip00dip@gmail.com` | Where submissions are delivered. |
+| `CONTACT_FROM` | no | `NeuroCraft <onboarding@resend.dev>` | Sender. Use a Resend‑verified domain address (e.g. `NeuroCraft <hello@neurocraft.tech>`) once `neurocraft.tech` is verified. |
+
+Until the domain is verified in Resend, the default `onboarding@resend.dev` sender
+only delivers to the Resend account owner's email — so test with that recipient first.
+
+To test the function locally, use `vercel dev` (plain `python3 -m http.server`
+serves the static page but not the `/api` route).
+
 ## Develop locally
 
 ```bash
