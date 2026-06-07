@@ -30,7 +30,7 @@ Set these environment variables in the Vercel project (Settings → Environment 
 | --- | --- | --- | --- |
 | `RESEND_API_KEY` | yes | — | Your Resend API key. |
 | `CONTACT_TO` | no | `dip00dip@gmail.com` | Where submissions are delivered. |
-| `CONTACT_FROM` | no | `NeuroCraft <onboarding@resend.dev>` | Sender. Use a Resend‑verified domain address (e.g. `NeuroCraft <hello@neurocraft.tech>`) once `neurocraft.tech` is verified. |
+| `CONTACT_FROM` | no | `NeuroCraft <onboarding@resend.dev>` | Sender, in `email@domain` or `Name <email@domain>` format. Use a Resend‑verified domain address once `neurocraft.tech` is verified. Enter the value **without** surrounding quotes, e.g. `NeuroCraft <hello@neurocraft.tech>`. |
 
 Until the domain is verified in Resend, the default `onboarding@resend.dev` sender
 only delivers to the Resend account owner's email — so test with that recipient first.

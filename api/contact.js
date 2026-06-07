@@ -53,8 +53,11 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Email service not configured' })
   }
 
-  const to = process.env.CONTACT_TO || 'dip00dip@gmail.com'
-  const from = process.env.CONTACT_FROM || 'NeuroCraft <onboarding@resend.dev>'
+  // Strip accidental wrapping quotes / whitespace from env values — a common
+  // mistake when pasting a `Name <email@domain>` value into the dashboard.
+  const clean = (v, fallback) => (v || fallback).trim().replace(/^["']|["']$/g, '').trim()
+  const to = clean(process.env.CONTACT_TO, 'dip00dip@gmail.com')
+  const from = clean(process.env.CONTACT_FROM, 'NeuroCraft <onboarding@resend.dev>')
 
   try {
     const r = await fetch('https://api.resend.com/emails', {
