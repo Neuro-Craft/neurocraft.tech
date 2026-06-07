@@ -1,0 +1,11 @@
+# Build output
+public/
+
+# Vercel
+.vercel/
+
+# OS / editor
+.DS_Store
+
+# Node (only if tooling is added later)
+node_modules/

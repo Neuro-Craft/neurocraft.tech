@@ -1,0 +1,2438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroCraft — Neural systems for a synthetic world</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg-deep: #050508;
+        --bg-card: #0a0a10;
+        --bg-elevated: #10101a;
+
+        /* Themed accent — overridden per view by the router (see <script>). */
+        --accent: #8aa0c8;
+        --accent-dim: #8aa0c845;
+        --accent-glow: #8aa0c818;
+
+        /* Fixed brand colors used by view-specific visuals. */
+        --cyan: #00e5c7;
+        --cyan-dim: #00e5c740;
+        --cyan-glow: #00e5c718;
+        --hud-green: #7dff4d;
+        --red-alert: #ff2d55;
+        --red-dim: #ff2d5540;
+        --amber: #ffb800;
+
+        --text-primary: #e8e8ef;
+        --text-secondary: #7a7a8e;
+        --text-dim: #44445a;
+        --border: #1a1a2e;
+        --font-display: 'Instrument Serif', Georgia, serif;
+        --font-body: 'Plus Jakarta Sans', sans-serif;
+        --font-mono: 'DM Mono', monospace;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--bg-deep);
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ============ SCAN LINES OVERLAY ============ */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(255, 255, 255, 0.012) 2px,
+          rgba(255, 255, 255, 0.012) 4px
+        );
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      /* ============ GRID BACKGROUND ============ */
+      .grid-bg {
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* ============ VIEW SWITCHING ============ */
+      .view {
+        display: none;
+      }
+      .view.active {
+        display: block;
+      }
+
+      /* ============ NAV ============ */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 1.25rem 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        backdrop-filter: blur(20px);
+        background: rgba(5, 5, 8, 0.8);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+      }
+
+      .nav-logo-icon {
+        width: 36px;
+        height: 36px;
+        border: 2px solid var(--accent);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.4s;
+      }
+
+      .nav-logo-icon::before {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--accent);
+        border-radius: 50%;
+        animation: pulse-ring 2s ease-in-out infinite;
+      }
+
+      .nav-logo-icon::after {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow:
+          0 0 10px var(--accent),
+          0 0 20px var(--accent-dim);
+      }
+
+      @keyframes pulse-ring {
+        0%,
+        100% {
+          transform: scale(0.8);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.3;
+        }
+      }
+
+      .nav-logo-text {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2.5rem;
+        align-items: center;
+        list-style: none;
+      }
+
+      .nav-links a {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        transition: color 0.3s;
+        cursor: pointer;
+      }
+
+      .nav-links a:hover {
+        color: var(--accent);
+      }
+
+      .nav-cta {
+        font-family: var(--font-mono) !important;
+        font-size: 0.7rem !important;
+        padding: 0.6rem 1.4rem;
+        background: var(--accent);
+        color: var(--bg-deep) !important;
+        border-radius: 4px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        transition: all 0.3s;
+        box-shadow: 0 0 20px var(--accent-dim);
+      }
+
+      .nav-cta:hover {
+        box-shadow:
+          0 0 30px var(--accent-dim),
+          0 0 60px var(--accent-glow);
+        transform: translateY(-1px);
+      }
+
+      /* ============ HERO ============ */
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 8rem 3rem 4rem;
+        z-index: 1;
+      }
+
+      .hero-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+      }
+
+      /* Company hero — single, centered column */
+      .hero-home .hero-content {
+        grid-template-columns: 1fr;
+        max-width: 860px;
+        text-align: center;
+      }
+      .hero-home .hero-status,
+      .hero-home .hero-desc {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .hero-home .hero-actions {
+        justify-content: center;
+      }
+      .hero-home h1 {
+        font-size: clamp(3rem, 6vw, 6rem);
+      }
+
+      .hero-left {
+        position: relative;
+      }
+
+      .hero-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1rem 0.4rem 0.6rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        margin-bottom: 2rem;
+        animation: fadeSlideUp 0.8s ease-out both;
+      }
+
+      .hero-status-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: blink 1.5s ease-in-out infinite;
+        box-shadow: 0 0 6px var(--accent);
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .hero-status-text {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        color: var(--accent);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      .hero h1 {
+        font-family: var(--font-display);
+        font-size: clamp(3rem, 5.5vw, 5.5rem);
+        line-height: 1.05;
+        font-weight: 400;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        animation: fadeSlideUp 0.8s ease-out 0.15s both;
+      }
+
+      .hero h1 em {
+        font-style: italic;
+        color: var(--accent);
+        text-shadow: 0 0 40px var(--accent-dim);
+      }
+
+      .hero-desc {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        max-width: 520px;
+        margin-bottom: 2.5rem;
+        animation: fadeSlideUp 0.8s ease-out 0.3s both;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+        animation: fadeSlideUp 0.8s ease-out 0.45s both;
+      }
+
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.9rem 2rem;
+        background: var(--accent);
+        color: var(--bg-deep);
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 0 30px var(--accent-dim);
+      }
+
+      .btn-primary:hover {
+        box-shadow:
+          0 0 40px var(--accent-dim),
+          0 0 80px var(--accent-glow);
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.9rem 2rem;
+        background: transparent;
+        color: var(--text-secondary);
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 400;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--text-secondary);
+        color: var(--text-primary);
+      }
+
+      @keyframes fadeSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ============ BACK LINK ============ */
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        transition: color 0.3s;
+        animation: fadeSlideUp 0.8s ease-out both;
+      }
+      .back-link:hover {
+        color: var(--accent);
+      }
+
+      /* ============ PRODUCT GRID (HUB) ============ */
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        margin-top: 4rem;
+        background: var(--border);
+        border: 1px solid var(--border);
+      }
+
+      .product-card {
+        background: var(--bg-card);
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        min-height: 320px;
+        transition: background 0.35s;
+      }
+
+      .product-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--card, var(--accent));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s;
+      }
+      .product-card:hover::before {
+        transform: scaleX(1);
+      }
+      .product-card:hover {
+        background: var(--bg-elevated);
+      }
+      .product-card.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+      }
+
+      .product-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .product-index {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        color: var(--text-dim);
+        letter-spacing: 0.15em;
+      }
+
+      .product-status {
+        font-family: var(--font-mono);
+        font-size: 0.55rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        padding: 0.25rem 0.6rem;
+        border-radius: 3px;
+      }
+      .product-status.live {
+        color: var(--card, var(--accent));
+        background: color-mix(in srgb, var(--card, var(--accent)) 14%, transparent);
+      }
+      .product-status.soon {
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+      }
+
+      .product-card h3 {
+        font-family: var(--font-display);
+        font-size: 2.1rem;
+        font-weight: 400;
+        color: var(--text-primary);
+        line-height: 1;
+      }
+
+      .product-tagline {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--card, var(--accent));
+      }
+
+      .product-blurb {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        line-height: 1.65;
+        flex: 1;
+      }
+
+      .product-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .product-tag {
+        font-family: var(--font-mono);
+        font-size: 0.55rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+      }
+
+      .product-go {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-primary);
+        display: inline-flex;
+        gap: 0.4rem;
+        align-items: center;
+        transition: gap 0.3s;
+      }
+      .product-card:hover .product-go {
+        gap: 0.8rem;
+        color: var(--card, var(--accent));
+      }
+
+      /* ============ METRICS BAR ============ */
+      .metrics-bar {
+        position: relative;
+        z-index: 1;
+        padding: 2rem 3rem;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-card);
+      }
+
+      .metrics-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+      }
+
+      .metric {
+        text-align: center;
+        padding: 1rem;
+      }
+
+      .metric-value {
+        font-family: var(--font-display);
+        font-size: 2.8rem;
+        color: var(--accent);
+        line-height: 1;
+        margin-bottom: 0.4rem;
+      }
+
+      .metric-label {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--text-secondary);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      /* ============ SECTION COMMON ============ */
+      section {
+        position: relative;
+        z-index: 1;
+        padding: 7rem 3rem;
+      }
+
+      .section-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .section-label {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--accent);
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+      }
+
+      .section-title {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 3.5vw, 3.5rem);
+        font-weight: 400;
+        color: var(--text-primary);
+        line-height: 1.15;
+        margin-bottom: 1.2rem;
+      }
+
+      .section-title em {
+        font-style: italic;
+        color: var(--accent);
+        text-shadow: 0 0 30px var(--accent-dim);
+      }
+
+      .section-desc {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        max-width: 560px;
+      }
+
+      /* ============ CAPABILITIES / FEATURES ============ */
+      .capabilities-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        margin-top: 4rem;
+        background: var(--border);
+        border: 1px solid var(--border);
+      }
+
+      .capability {
+        background: var(--bg-card);
+        padding: 2.5rem;
+        transition: all 0.4s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .capability::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s;
+      }
+
+      .capability:hover::before {
+        transform: scaleX(1);
+      }
+
+      .capability:hover {
+        background: var(--bg-elevated);
+      }
+
+      .capability-index {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--text-dim);
+        letter-spacing: 0.15em;
+        margin-bottom: 1.5rem;
+      }
+
+      .capability-icon {
+        width: 44px;
+        height: 44px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+        transition: border-color 0.3s;
+      }
+
+      .capability:hover .capability-icon {
+        border-color: var(--accent-dim);
+      }
+
+      .capability h3 {
+        font-family: var(--font-body);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+      }
+
+      .capability p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.65;
+      }
+
+      /* ============ HOW IT WORKS / COMPANY ============ */
+      .how-section {
+        background: var(--bg-card);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .how-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5rem;
+        align-items: start;
+        margin-top: 4rem;
+      }
+
+      .how-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .how-step {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 1.5rem;
+        padding: 2rem 0;
+        border-bottom: 1px solid var(--border);
+        position: relative;
+      }
+
+      .how-step:last-child {
+        border-bottom: none;
+      }
+
+      .how-step-num {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        color: var(--text-dim);
+        line-height: 1;
+        transition: color 0.3s;
+      }
+
+      .how-step:hover .how-step-num {
+        color: var(--accent);
+      }
+
+      .how-step h4 {
+        font-family: var(--font-body);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .how-step p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.65;
+      }
+
+      /* Company values list reuses .how-step structure */
+
+      /* Terminal Visual */
+      .terminal {
+        background: var(--bg-deep);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        position: sticky;
+        top: 8rem;
+      }
+
+      .terminal-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-elevated);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .terminal-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--text-dim);
+      }
+
+      .terminal-dot:nth-child(1) {
+        background: #ff5f57;
+      }
+      .terminal-dot:nth-child(2) {
+        background: #ffbd2e;
+      }
+      .terminal-dot:nth-child(3) {
+        background: #28c840;
+      }
+
+      .terminal-title {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+        margin-left: 0.5rem;
+      }
+
+      .terminal-body {
+        padding: 1.25rem;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        line-height: 1.9;
+        min-height: 340px;
+      }
+
+      .t-prompt {
+        color: var(--accent);
+      }
+      .t-cmd {
+        color: var(--text-primary);
+      }
+      .t-comment {
+        color: var(--text-dim);
+      }
+      .t-success {
+        color: #28c840;
+      }
+      .t-warn {
+        color: var(--amber);
+      }
+      .t-error {
+        color: var(--red-alert);
+      }
+      .t-line {
+        display: block;
+      }
+
+      .cursor-blink {
+        display: inline-block;
+        width: 7px;
+        height: 14px;
+        background: var(--accent);
+        margin-left: 2px;
+        animation: cursor-blink 1s step-end infinite;
+        vertical-align: middle;
+      }
+
+      @keyframes cursor-blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* ============ THREAT FEED ============ */
+      .feed-section {
+        overflow: hidden;
+      }
+
+      .feed-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 3rem;
+      }
+
+      .feed-scroll {
+        display: flex;
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: var(--border);
+      }
+
+      .feed-card {
+        flex: 0 0 33.333%;
+        background: var(--bg-card);
+        padding: 2rem;
+        position: relative;
+        transition: all 0.3s;
+      }
+
+      .feed-card:hover {
+        background: var(--bg-elevated);
+      }
+
+      .feed-card-time {
+        font-family: var(--font-mono);
+        font-size: 0.55rem;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+      }
+
+      .feed-card-tag {
+        display: inline-block;
+        padding: 0.25rem 0.6rem;
+        border-radius: 3px;
+        font-family: var(--font-mono);
+        font-size: 0.55rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+      }
+
+      .feed-card-tag.deepfake {
+        background: var(--red-dim);
+        color: var(--red-alert);
+      }
+      .feed-card-tag.narrative {
+        background: rgba(255, 184, 0, 0.15);
+        color: var(--amber);
+      }
+      .feed-card-tag.verified {
+        background: var(--accent-glow);
+        color: var(--accent);
+      }
+
+      .feed-card h4 {
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+      }
+
+      .feed-card p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1.25rem;
+      }
+
+      .feed-card-confidence {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+      }
+
+      .feed-card-confidence span {
+        color: var(--red-alert);
+        font-weight: 500;
+      }
+
+      .feed-card-confidence span.high-conf {
+        color: var(--accent);
+      }
+
+      /* ============ DOVIRA SCANNER VISUAL (cyan, fixed) ============ */
+      .scanner-container {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1;
+        max-width: 520px;
+        margin-left: auto;
+        animation: fadeSlideUp 1s ease-out 0.5s both;
+      }
+
+      .scanner-ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+      }
+      .scanner-ring-1 {
+        inset: 0;
+        animation: rotate-slow 20s linear infinite;
+      }
+      .scanner-ring-2 {
+        inset: 12%;
+        border-color: var(--cyan-dim);
+        animation: rotate-slow 15s linear infinite reverse;
+      }
+      .scanner-ring-3 {
+        inset: 24%;
+        border-color: rgba(0, 229, 199, 0.15);
+        animation: rotate-slow 10s linear infinite;
+      }
+      .scanner-ring-4 {
+        inset: 36%;
+        border-color: rgba(0, 229, 199, 0.08);
+      }
+
+      @keyframes rotate-slow {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .scanner-ring-1::before,
+      .scanner-ring-2::before,
+      .scanner-ring-3::before {
+        content: '';
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        top: 50%;
+        left: -4px;
+        box-shadow: 0 0 10px var(--cyan);
+      }
+      .scanner-ring-2::before {
+        background: var(--red-alert);
+        box-shadow: 0 0 10px var(--red-alert);
+      }
+
+      .scanner-sweep {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: conic-gradient(
+          from 0deg,
+          transparent 0deg,
+          var(--cyan-glow) 30deg,
+          transparent 60deg
+        );
+        animation: rotate-slow 4s linear infinite;
+      }
+
+      .scanner-core {
+        position: absolute;
+        inset: 40%;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .scanner-core-icon {
+        width: 48px;
+        height: 48px;
+        border: 2px solid var(--cyan);
+        border-radius: 12px;
+        transform: rotate(45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: core-pulse 3s ease-in-out infinite;
+        box-shadow: 0 0 30px var(--cyan-dim);
+      }
+
+      .scanner-core-icon::before {
+        content: '';
+        width: 12px;
+        height: 12px;
+        background: var(--cyan);
+        border-radius: 3px;
+        box-shadow: 0 0 15px var(--cyan);
+      }
+
+      @keyframes core-pulse {
+        0%,
+        100% {
+          transform: rotate(45deg) scale(1);
+        }
+        50% {
+          transform: rotate(45deg) scale(1.1);
+        }
+      }
+
+      .scanner-data-points {
+        position: absolute;
+        inset: 0;
+      }
+
+      .data-point {
+        position: absolute;
+        font-family: var(--font-mono);
+        font-size: 0.55rem;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+        white-space: nowrap;
+        animation: data-fade 3s ease-in-out infinite;
+      }
+
+      .data-point:nth-child(1) {
+        top: 8%;
+        left: 55%;
+        animation-delay: 0s;
+      }
+      .data-point:nth-child(2) {
+        top: 25%;
+        right: 2%;
+        animation-delay: 0.5s;
+      }
+      .data-point:nth-child(3) {
+        bottom: 30%;
+        right: 0;
+        animation-delay: 1s;
+      }
+      .data-point:nth-child(4) {
+        bottom: 10%;
+        left: 40%;
+        animation-delay: 1.5s;
+      }
+      .data-point:nth-child(5) {
+        top: 40%;
+        left: 0;
+        animation-delay: 2s;
+      }
+
+      .data-point.alert {
+        color: var(--red-alert);
+      }
+      .data-point.ok {
+        color: var(--cyan);
+      }
+
+      @keyframes data-fade {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* ============ DRONE OSD / HUD VISUAL (green, fixed) ============ */
+      .osd {
+        position: relative;
+        width: 100%;
+        max-width: 540px;
+        aspect-ratio: 4 / 3;
+        margin-left: auto;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background:
+          radial-gradient(circle at 50% 58%, rgba(125, 255, 77, 0.06), transparent 65%),
+          var(--bg-deep);
+        overflow: hidden;
+        font-family: var(--font-mono);
+        animation: fadeSlideUp 1s ease-out 0.4s both;
+      }
+
+      .osd::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(125, 255, 77, 0.03) 3px,
+          rgba(125, 255, 77, 0.03) 4px
+        );
+        pointer-events: none;
+      }
+
+      .osd-corner {
+        position: absolute;
+        font-size: 0.62rem;
+        line-height: 1.6;
+        letter-spacing: 0.1em;
+        color: var(--hud-green);
+        text-shadow: 0 0 8px rgba(125, 255, 77, 0.45);
+      }
+      .osd-corner.tl {
+        top: 1rem;
+        left: 1rem;
+      }
+      .osd-corner.tr {
+        top: 1rem;
+        right: 1rem;
+        text-align: right;
+      }
+      .osd-corner.bl {
+        bottom: 1rem;
+        left: 1rem;
+      }
+      .osd-corner.br {
+        bottom: 1rem;
+        right: 1rem;
+        text-align: right;
+      }
+
+      .osd-rec {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--red-alert);
+        box-shadow: 0 0 8px var(--red-alert);
+        margin-right: 0.35rem;
+        animation: blink 1.2s ease-in-out infinite;
+        vertical-align: middle;
+      }
+
+      .osd-horizon {
+        position: absolute;
+        top: 50%;
+        left: 14%;
+        right: 14%;
+        height: 1px;
+        background: var(--hud-green);
+        box-shadow: 0 0 8px rgba(125, 255, 77, 0.5);
+        opacity: 0.55;
+        animation: osd-tilt 7s ease-in-out infinite;
+      }
+      .osd-horizon::before,
+      .osd-horizon::after {
+        content: '';
+        position: absolute;
+        top: -3px;
+        width: 1px;
+        height: 7px;
+        background: var(--hud-green);
+      }
+      .osd-horizon::before {
+        left: 0;
+      }
+      .osd-horizon::after {
+        right: 0;
+      }
+
+      @keyframes osd-tilt {
+        0%,
+        100% {
+          transform: rotate(-4deg);
+        }
+        50% {
+          transform: rotate(4deg);
+        }
+      }
+
+      .osd-cross {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 46px;
+        height: 46px;
+        transform: translate(-50%, -50%);
+      }
+      .osd-cross::before,
+      .osd-cross::after {
+        content: '';
+        position: absolute;
+        background: var(--hud-green);
+        box-shadow: 0 0 6px rgba(125, 255, 77, 0.5);
+      }
+      .osd-cross::before {
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        transform: translateX(-50%);
+      }
+      .osd-cross::after {
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        transform: translateY(-50%);
+      }
+
+      .osd-scan {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 28%;
+        top: -28%;
+        background: linear-gradient(transparent, rgba(125, 255, 77, 0.07));
+        animation: osd-scanline 4.5s linear infinite;
+      }
+      @keyframes osd-scanline {
+        to {
+          top: 100%;
+        }
+      }
+
+      /* ============ CTA SECTION ============ */
+      .cta-section {
+        text-align: center;
+        padding: 8rem 3rem;
+      }
+
+      .cta-section .section-label {
+        margin-bottom: 1.5rem;
+      }
+
+      .cta-section .section-title {
+        max-width: 700px;
+        margin: 0 auto 1.2rem;
+      }
+
+      .cta-section .section-desc {
+        max-width: 500px;
+        margin: 0 auto 3rem;
+      }
+
+      .cta-form {
+        display: flex;
+        gap: 0.75rem;
+        max-width: 480px;
+        margin: 0 auto;
+      }
+
+      .cta-input {
+        flex: 1;
+        padding: 0.9rem 1.25rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color 0.3s;
+      }
+
+      .cta-input::placeholder {
+        color: var(--text-dim);
+      }
+      .cta-input:focus {
+        border-color: var(--accent-dim);
+      }
+
+      .cta-form .btn-primary {
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      /* ============ FOOTER ============ */
+      footer {
+        position: relative;
+        z-index: 1;
+        border-top: 1px solid var(--border);
+        padding: 3rem;
+      }
+
+      .footer-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .footer-left {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .footer-links a {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--text-dim);
+        text-decoration: none;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition: color 0.3s;
+        cursor: pointer;
+      }
+
+      .footer-links a:hover {
+        color: var(--text-secondary);
+      }
+
+      /* ============ SCROLL ANIMATIONS ============ */
+      .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition:
+          opacity 0.8s ease-out,
+          transform 0.8s ease-out;
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .reveal-delay-1 {
+        transition-delay: 0.1s;
+      }
+      .reveal-delay-2 {
+        transition-delay: 0.2s;
+      }
+      .reveal-delay-3 {
+        transition-delay: 0.3s;
+      }
+      .reveal-delay-4 {
+        transition-delay: 0.4s;
+      }
+      .reveal-delay-5 {
+        transition-delay: 0.5s;
+      }
+
+      /* ============ RESPONSIVE ============ */
+      @media (max-width: 1024px) {
+        .hero-content {
+          grid-template-columns: 1fr;
+          gap: 3rem;
+        }
+        .scanner-container,
+        .osd {
+          max-width: 400px;
+          margin: 0 auto;
+        }
+        .capabilities-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .product-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .how-grid {
+          grid-template-columns: 1fr;
+          gap: 3rem;
+        }
+        .terminal {
+          position: static;
+        }
+        .feed-card {
+          flex: 0 0 50%;
+        }
+        .metrics-inner {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 640px) {
+        nav {
+          padding: 1rem 1.5rem;
+        }
+        .nav-links {
+          gap: 1.25rem;
+        }
+        .nav-links li.hide-sm {
+          display: none;
+        }
+        section,
+        .hero {
+          padding: 4rem 1.5rem;
+        }
+        .hero {
+          padding-top: 7rem;
+        }
+        .capabilities-grid,
+        .product-grid {
+          grid-template-columns: 1fr;
+        }
+        .feed-card {
+          flex: 0 0 100%;
+        }
+        .metrics-inner {
+          grid-template-columns: 1fr 1fr;
+        }
+        .cta-form {
+          flex-direction: column;
+        }
+        .footer-inner {
+          flex-direction: column;
+          gap: 1.5rem;
+          text-align: center;
+        }
+        .hero-actions {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .hero-home .hero-actions {
+          align-items: center;
+        }
+      }
+    </style>
+  </head>
+  <body data-view="home">
+    <div class="grid-bg"></div>
+
+    <!-- ========== NAV ========== -->
+    <nav>
+      <a href="#/" class="nav-logo">
+        <div class="nav-logo-icon"></div>
+        <span class="nav-logo-text">NeuroCraft</span>
+      </a>
+      <ul class="nav-links">
+        <li><a data-scroll="products">Products</a></li>
+        <li class="hide-sm"><a data-scroll="company">Company</a></li>
+        <li><a data-scroll="contact" class="nav-cta">Contact</a></li>
+      </ul>
+    </nav>
+
+    <!-- ============================================================= -->
+    <!-- ========== VIEW: HOME (NeuroCraft hub) ========== -->
+    <!-- ============================================================= -->
+    <section class="view active" data-view="home">
+      <div class="hero hero-home">
+        <div class="hero-content">
+          <div class="hero-left">
+            <div class="hero-status">
+              <div class="hero-status-dot"></div>
+              <span class="hero-status-text">NeuroCraft · Applied neural systems</span>
+            </div>
+            <h1>Neural systems for a<br /><em>synthetic</em> world.</h1>
+            <p class="hero-desc">
+              We build production-grade AI for high-stakes, real-world domains &mdash; from
+              detecting synthetic media to simulating flight with deterministic precision. One
+              studio, many products.
+            </p>
+            <div class="hero-actions">
+              <a class="btn-primary" data-scroll="products">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+                Explore Products
+              </a>
+              <a class="btn-secondary" data-scroll="contact">Get in Touch</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products grid -->
+      <section id="products">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Products</div>
+            <h2 class="section-title">What we <em>build</em></h2>
+            <p class="section-desc">
+              Each product is a focused neural system, engineered for a specific real-world mission.
+            </p>
+          </div>
+          <div class="product-grid" id="product-grid"><!-- rendered from PRODUCTS registry --></div>
+        </div>
+      </section>
+
+      <!-- Company -->
+      <section id="company" class="how-section">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Company</div>
+            <h2 class="section-title">Built by <em>NeuroCraft</em></h2>
+          </div>
+          <div class="how-grid">
+            <div class="reveal reveal-delay-1">
+              <p class="section-desc">
+                NeuroCraft is an applied-AI studio. We turn frontier neural architectures into
+                dependable products for domains where correctness, speed, and trust are
+                non-negotiable. We ship our own systems and partner with teams who need them.
+              </p>
+            </div>
+            <div class="how-steps reveal reveal-delay-2">
+              <div class="how-step">
+                <div class="how-step-num">01</div>
+                <div>
+                  <h4>Deterministic by design</h4>
+                  <p>Systems you can reason about, reproduce, and trust under pressure.</p>
+                </div>
+              </div>
+              <div class="how-step">
+                <div class="how-step-num">02</div>
+                <div>
+                  <h4>Real-world fidelity</h4>
+                  <p>Models grounded in how the physical and information world actually behaves.</p>
+                </div>
+              </div>
+              <div class="how-step">
+                <div class="how-step-num">03</div>
+                <div>
+                  <h4>Built to scale</h4>
+                  <p>From a single laptop to networked, multi-user deployments.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section class="cta-section" id="contact">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Contact</div>
+            <h2 class="section-title">Let's build something<br /><em>that matters</em></h2>
+            <p class="section-desc">
+              Partner with NeuroCraft, request access to a product, or just say hello.
+            </p>
+          </div>
+          <form
+            class="cta-form reveal reveal-delay-2"
+            onsubmit="
+              event.preventDefault()
+              this.querySelector('button').textContent = 'SENT ✓'
+              this.querySelector('button').style.background = '#28c840'
+            "
+          >
+            <input type="email" class="cta-input" placeholder="your@email.com" required />
+            <button type="submit" class="btn-primary">Get in Touch</button>
+          </form>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- ========== VIEW: DOVIRA ========== -->
+    <!-- ============================================================= -->
+    <section class="view" data-view="dovira">
+      <div class="hero">
+        <div class="hero-content">
+          <div class="hero-left">
+            <a class="back-link" href="#/">&larr; All products</a>
+            <div class="hero-status">
+              <div class="hero-status-dot"></div>
+              <span class="hero-status-text">Dovira · Active threat monitoring</span>
+            </div>
+            <h1>Truth has a <em>frequency.</em><br />We detect it.</h1>
+            <p class="hero-desc">
+              Dovira deploys advanced neural architectures to identify deepfakes, synthetic media,
+              and coordinated false narratives in real time &mdash; before they spread.
+            </p>
+            <div class="hero-actions">
+              <a href="#access" class="btn-primary">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+                Request Access
+              </a>
+              <a href="#how" class="btn-secondary">See How It Works</a>
+            </div>
+          </div>
+          <div class="scanner-container">
+            <div class="scanner-ring scanner-ring-1"></div>
+            <div class="scanner-ring scanner-ring-2"></div>
+            <div class="scanner-ring scanner-ring-3"></div>
+            <div class="scanner-ring scanner-ring-4"></div>
+            <div class="scanner-sweep"></div>
+            <div class="scanner-core">
+              <div class="scanner-core-icon"></div>
+            </div>
+            <div class="scanner-data-points">
+              <div class="data-point ok">SIG:VERIFIED &#x2713;</div>
+              <div class="data-point alert">ANOMALY:0xF2</div>
+              <div class="data-point">HASH:a7c3..9f1b</div>
+              <div class="data-point alert">DEEPFAKE:93.2%</div>
+              <div class="data-point ok">ORIGIN:TRACED</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-bar">
+        <div class="metrics-inner">
+          <div class="metric reveal">
+            <div class="metric-value">47ms</div>
+            <div class="metric-label">Avg Detection Latency</div>
+          </div>
+          <div class="metric reveal reveal-delay-1">
+            <div class="metric-value">99.7%</div>
+            <div class="metric-label">Deepfake Accuracy</div>
+          </div>
+          <div class="metric reveal reveal-delay-2">
+            <div class="metric-value">2.1M+</div>
+            <div class="metric-label">Threats Flagged Daily</div>
+          </div>
+          <div class="metric reveal reveal-delay-3">
+            <div class="metric-value">140+</div>
+            <div class="metric-label">Languages Supported</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Capabilities -->
+      <section id="capabilities">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Core Capabilities</div>
+            <h2 class="section-title">
+              Six layers of <em>defense</em><br />against synthetic deception
+            </h2>
+            <p class="section-desc">
+              Our multi-modal detection engine analyzes content across visual, auditory, linguistic,
+              and behavioral dimensions simultaneously.
+            </p>
+          </div>
+          <div class="capabilities-grid">
+            <div class="capability reveal">
+              <div class="capability-index">01</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="3" />
+                  <circle cx="12" cy="10" r="3" />
+                  <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+                </svg>
+              </div>
+              <h3>Face Forgery Detection</h3>
+              <p>
+                Identifies GAN-generated faces, face swaps, and reenactment artifacts using spectral
+                analysis and micro-expression tracking.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-1">
+              <div class="capability-index">02</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  <line x1="12" y1="19" x2="12" y2="22" />
+                </svg>
+              </div>
+              <h3>Voice Clone Detection</h3>
+              <p>
+                Detects synthetic speech, cloned voices, and audio splicing through prosodic
+                analysis and neural voiceprint matching.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-2">
+              <div class="capability-index">03</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6" />
+                  <path d="M16 13H8" />
+                  <path d="M16 17H8" />
+                  <path d="M10 9H8" />
+                </svg>
+              </div>
+              <h3>Narrative Graph Analysis</h3>
+              <p>
+                Maps coordinated inauthentic behavior and narrative propagation networks using
+                temporal graph neural networks.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-1">
+              <div class="capability-index">04</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path
+                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                  />
+                  <path d="M7.5 4.21l4.5 2.6 4.5-2.6" />
+                  <path d="M7.5 19.79V14.6L3 12" />
+                  <path d="M21 12l-4.5 2.6v5.19" />
+                  <path d="M3.27 6.96L12 12.01l8.73-5.05" />
+                  <path d="M12 22.08V12" />
+                </svg>
+              </div>
+              <h3>Provenance Tracking</h3>
+              <p>
+                Traces media origin through cryptographic watermark analysis, EXIF forensics, and
+                blockchain-verified content chains.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-2">
+              <div class="capability-index">05</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+              </div>
+              <h3>Real-Time Stream Analysis</h3>
+              <p>
+                Monitors live broadcasts, social feeds, and messaging platforms with sub-100ms
+                detection latency at scale.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-3">
+              <div class="capability-index">06</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <h3>Threat Intelligence</h3>
+              <p>
+                Aggregates global disinformation patterns into actionable intelligence reports with
+                attribution confidence scoring.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="how-section" id="how">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Process</div>
+            <h2 class="section-title">From ingestion to <em>verdict</em><br />in milliseconds</h2>
+          </div>
+          <div class="how-grid">
+            <div class="how-steps">
+              <div class="how-step reveal">
+                <div class="how-step-num">01</div>
+                <div>
+                  <h4>Ingest & Decompose</h4>
+                  <p>
+                    Content is ingested via API, browser extension, or platform integration.
+                    Multi-modal decomposition separates visual, audio, and textual signals for
+                    parallel analysis.
+                  </p>
+                </div>
+              </div>
+              <div class="how-step reveal reveal-delay-1">
+                <div class="how-step-num">02</div>
+                <div>
+                  <h4>Neural Analysis Pipeline</h4>
+                  <p>
+                    Specialized detection models run simultaneously — facial forensics, voice
+                    authentication, semantic consistency, and provenance verification through our
+                    ensemble architecture.
+                  </p>
+                </div>
+              </div>
+              <div class="how-step reveal reveal-delay-2">
+                <div class="how-step-num">03</div>
+                <div>
+                  <h4>Cross-Signal Correlation</h4>
+                  <p>
+                    Results are fused across modalities. A video with authentic faces but synthetic
+                    audio triggers cross-modal flags. Narrative patterns are checked against our
+                    threat knowledge graph.
+                  </p>
+                </div>
+              </div>
+              <div class="how-step reveal reveal-delay-3">
+                <div class="how-step-num">04</div>
+                <div>
+                  <h4>Verdict & Response</h4>
+                  <p>
+                    A confidence-scored verdict is delivered with full explainability — highlighting
+                    exactly which signals triggered detection and providing forensic evidence
+                    chains.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="terminal reveal reveal-delay-2">
+              <div class="terminal-header">
+                <div class="terminal-dot"></div>
+                <div class="terminal-dot"></div>
+                <div class="terminal-dot"></div>
+                <span class="terminal-title">dovira — analysis session</span>
+              </div>
+              <div class="terminal-body">
+                <span class="t-line"
+                  ><span class="t-prompt">$</span>
+                  <span class="t-cmd">dovira analyze --source media_clip.mp4</span></span
+                >
+                <span class="t-line">&nbsp;</span>
+                <span class="t-line"
+                  ><span class="t-comment">→ Ingesting media... 3 streams detected</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-comment">→ Running facial forensics pipeline...</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-success"> ✓ Face mesh integrity: PASS</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-comment">→ Running voice authentication...</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-error"> ✗ Voice clone detected (conf: 97.3%)</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-comment">→ Semantic consistency check...</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-warn"> ⚠ Temporal anomaly in lip-sync</span></span
+                >
+                <span class="t-line"><span class="t-comment">→ Cross-modal fusion...</span></span>
+                <span class="t-line">&nbsp;</span>
+                <span class="t-line"
+                  ><span class="t-error">VERDICT: SYNTHETIC MEDIA (0.94)</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-comment"> Primary: voice cloning (TTS-GAN v2)</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-comment"> Secondary: lip-sync mismatch</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-comment"> Report: /out/forensic_a7c3.pdf</span></span
+                >
+                <span class="t-line">&nbsp;</span>
+                <span class="t-line"
+                  ><span class="t-prompt">$</span> <span class="cursor-blink"></span
+                ></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Threat feed -->
+      <section class="feed-section" id="feed">
+        <div class="section-inner">
+          <div class="feed-header reveal">
+            <div>
+              <div class="section-label">// Live Detection Feed</div>
+              <h2 class="section-title">Recent <em>detections</em></h2>
+            </div>
+          </div>
+          <div class="feed-scroll">
+            <div class="feed-card reveal">
+              <div class="feed-card-time">2026-02-08 • 14:32 UTC</div>
+              <div class="feed-card-tag deepfake">Deepfake</div>
+              <h4>Synthetic video of public official detected across 12 platforms</h4>
+              <p>
+                GAN-generated face swap on legitimate broadcast footage. Propagation traced to
+                coordinated network of 340+ accounts.
+              </p>
+              <div class="feed-card-confidence">Detection confidence: <span>98.7%</span></div>
+            </div>
+            <div class="feed-card reveal reveal-delay-1">
+              <div class="feed-card-time">2026-02-08 • 13:17 UTC</div>
+              <div class="feed-card-tag narrative">False Narrative</div>
+              <h4>Coordinated inauthentic narrative seeded in financial markets</h4>
+              <p>
+                Fabricated earnings report circulated through synthetic news sites and amplified via
+                bot networks to manipulate stock price.
+              </p>
+              <div class="feed-card-confidence">Detection confidence: <span>94.2%</span></div>
+            </div>
+            <div class="feed-card reveal reveal-delay-2">
+              <div class="feed-card-time">2026-02-08 • 12:05 UTC</div>
+              <div class="feed-card-tag verified">Verified Authentic</div>
+              <h4>Disputed emergency broadcast confirmed as genuine</h4>
+              <p>
+                Media authenticated via provenance chain and cross-referenced with 4 independent
+                sources. Cryptographic watermark intact.
+              </p>
+              <div class="feed-card-confidence">
+                Authenticity confidence: <span class="high-conf">99.1%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dovira CTA -->
+      <section class="cta-section" id="access">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Early Access</div>
+            <h2 class="section-title">Defend truth<br />at <em>machine speed</em></h2>
+            <p class="section-desc">
+              Join our early access program and deploy Dovira's detection engine in your
+              organization.
+            </p>
+          </div>
+          <form
+            class="cta-form reveal reveal-delay-2"
+            onsubmit="
+              event.preventDefault()
+              this.querySelector('button').textContent = 'REQUESTED ✓'
+              this.querySelector('button').style.background = '#28c840'
+            "
+          >
+            <input type="email" class="cta-input" placeholder="your@email.com" required />
+            <button type="submit" class="btn-primary">Request Access</button>
+          </form>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- ========== VIEW: DRONE SIMULATOR ========== -->
+    <!-- ============================================================= -->
+    <section class="view" data-view="dronesim">
+      <div class="hero">
+        <div class="hero-content">
+          <div class="hero-left">
+            <a class="back-link" href="#/">&larr; All products</a>
+            <div class="hero-status">
+              <div class="hero-status-dot"></div>
+              <span class="hero-status-text">Drone Simulator · Flight-true physics</span>
+            </div>
+            <h1>Fly the <em>real thing</em><br />before you fly.</h1>
+            <p class="hero-desc">
+              A drone simulator with realistic, deterministic physics and faithful models of
+              real-world airframes &mdash; from OSD to control response. Train solo or in networked
+              multi-user sessions, then replay every flight.
+            </p>
+            <div class="hero-actions">
+              <a href="#drone-access" class="btn-primary">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+                Request Access
+              </a>
+              <a href="#drone-features" class="btn-secondary">See Features</a>
+            </div>
+          </div>
+          <div class="osd">
+            <div class="osd-scan"></div>
+            <div class="osd-corner tl"><span class="osd-rec"></span>REC<br />CAM 1 · 4K60</div>
+            <div class="osd-corner tr">BAT 92%<br />14.4V</div>
+            <div class="osd-corner bl">ALT 124 m<br />SPD 38 km/h</div>
+            <div class="osd-corner br">GPS 14 ◎<br />HOME 0.4 km</div>
+            <div class="osd-horizon"></div>
+            <div class="osd-cross"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drone features -->
+      <section id="drone-features">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Capabilities</div>
+            <h2 class="section-title">Simulation that behaves<br />like <em>reality</em></h2>
+            <p class="section-desc">
+              Every system is tuned for fidelity and reproducibility &mdash; what you learn in the
+              sim transfers to the field.
+            </p>
+          </div>
+          <div class="capabilities-grid">
+            <div class="capability reveal">
+              <div class="capability-index">01</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 3" />
+                </svg>
+              </div>
+              <h3>Deterministic Physics</h3>
+              <p>
+                Realistic, frame-exact flight dynamics. The same inputs produce the same flight
+                every single run — ideal for training and analysis.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-1">
+              <div class="capability-index">02</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </div>
+              <h3>Scalable Visuals</h3>
+              <p>
+                Runs from low-spec laptops to high-fidelity GPUs. Visual quality scales without ever
+                changing how the aircraft flies.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-2">
+              <div class="capability-index">03</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M12 2 2 7l10 5 10-5-10-5Z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
+              </div>
+              <h3>Real Drone Models</h3>
+              <p>
+                Faithful simulations of real-life drone models — airframes, motors, and control
+                response close to their real-world counterparts.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-1">
+              <div class="capability-index">04</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <rect x="2" y="4" width="20" height="14" rx="2" />
+                  <path d="M12 8v6M9 11h6" />
+                  <path d="M7 22h10" />
+                </svg>
+              </div>
+              <h3>Authentic OSD</h3>
+              <p>
+                On-screen displays and telemetry overlays matched closely to real hardware, so the
+                interface feels exactly like the cockpit you'll fly.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-2">
+              <div class="capability-index">05</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="6" r="3" />
+                  <circle cx="18" cy="18" r="3" />
+                  <path d="M8.6 10.6 15.4 7.4M8.6 13.4l6.8 3.2" />
+                </svg>
+              </div>
+              <h3>Multi-User Networking</h3>
+              <p>
+                Shared, networked environments for squads, instructors, and races — fly together in
+                the same synchronized world.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-3">
+              <div class="capability-index">06</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+              </div>
+              <h3>Full Replay</h3>
+              <p>
+                Record and rewind any session. Scrub, review, and analyze every flight for training,
+                debriefs, and incident reconstruction.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Drone CTA -->
+      <section class="cta-section" id="drone-access">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Early Access</div>
+            <h2 class="section-title">Get in the <em>cockpit</em></h2>
+            <p class="section-desc">
+              Request access to the NeuroCraft Drone Simulator for training, research, or
+              competition.
+            </p>
+          </div>
+          <form
+            class="cta-form reveal reveal-delay-2"
+            onsubmit="
+              event.preventDefault()
+              this.querySelector('button').textContent = 'REQUESTED ✓'
+              this.querySelector('button').style.background = '#28c840'
+            "
+          >
+            <input type="email" class="cta-input" placeholder="your@email.com" required />
+            <button type="submit" class="btn-primary">Request Access</button>
+          </form>
+        </div>
+      </section>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-left">&copy; 2026 Neuro Craft Inc. All rights reserved.</div>
+        <ul class="footer-links">
+          <li><a href="#/">Products</a></li>
+          <li><a>Privacy</a></li>
+          <li><a>Terms</a></li>
+          <li><a data-scroll="contact">Contact</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      // ============ PRODUCT REGISTRY ============
+      // Single source of truth for the hub grid + nav.
+      // To add a product:
+      //   1) Add an entry to PRODUCTS below.
+      //   2) Add a matching entry to THEMES (its accent color set + page title).
+      //   3) Copy a <section class="view" data-view="<slug>"> block and fill in content.
+      const PRODUCTS = [
+        {
+          slug: 'dovira',
+          name: 'Dovira',
+          status: 'live',
+          color: '#00e5c7',
+          tagline: 'Real-time deepfake & narrative detection',
+          blurb:
+            'Multi-modal neural detection of deepfakes, voice clones, and coordinated false narratives — in real time, before they spread.',
+          tags: ['Detection', 'Forensics', 'Threat Intel'],
+        },
+        {
+          slug: 'dronesim',
+          name: 'Drone Simulator',
+          status: 'live',
+          color: '#7dff4d',
+          tagline: 'Deterministic drone flight simulation',
+          blurb:
+            'Frame-exact flight physics, faithful real-world drone models, authentic OSD, networked multi-user sessions, and full replay.',
+          tags: ['Simulation', 'Training', 'Networked'],
+        },
+      ]
+
+      // Per-view accent theme: [accent, accent-dim, accent-glow] + document title.
+      const THEMES = {
+        home: {
+          title: 'NeuroCraft — Neural systems for a synthetic world',
+          accent: ['#8aa0c8', '#8aa0c845', '#8aa0c818'],
+        },
+        dovira: {
+          title: 'Dovira — Real-Time Deepfake & Narrative Detection',
+          accent: ['#00e5c7', '#00e5c745', '#00e5c718'],
+        },
+        dronesim: {
+          title: 'NeuroCraft Drone Simulator — Deterministic flight simulation',
+          accent: ['#7dff4d', '#7dff4d45', '#7dff4d18'],
+        },
+      }
+
+      // ============ RENDER HUB CARDS ============
+      const grid = document.getElementById('product-grid')
+      grid.innerHTML =
+        PRODUCTS.map(
+          (p, i) => `
+        <a class="product-card reveal${i ? ` reveal-delay-${i}` : ''}" href="#${p.slug}" style="--card:${p.color}">
+          <div class="product-card-top">
+            <span class="product-status ${p.status}">${p.status === 'live' ? 'Live' : 'Coming soon'}</span>
+            <span class="product-index">${String(i + 1).padStart(2, '0')}</span>
+          </div>
+          <h3>${p.name}</h3>
+          <div class="product-tagline">${p.tagline}</div>
+          <p class="product-blurb">${p.blurb}</p>
+          <div class="product-tags">${p.tags.map((t) => `<span class="product-tag">${t}</span>`).join('')}</div>
+          <span class="product-go">Explore &rarr;</span>
+        </a>`,
+        ).join('') +
+        `
+        <div class="product-card disabled reveal reveal-delay-${PRODUCTS.length}" style="--card:#44445a">
+          <div class="product-card-top">
+            <span class="product-status soon">Coming soon</span>
+            <span class="product-index">+</span>
+          </div>
+          <h3>More to come</h3>
+          <div class="product-tagline">New systems in the lab</div>
+          <p class="product-blurb">NeuroCraft is expanding. Additional neural systems are in development.</p>
+        </div>`
+
+      // ============ OBSERVERS (reveal + metric counters) ============
+      let revealObs, metricsObs
+
+      function animateValue(el, start, end, suffix, duration) {
+        const startTime = performance.now()
+        const isFloat = String(end).includes('.')
+        function update(currentTime) {
+          const progress = Math.min((currentTime - startTime) / duration, 1)
+          const eased = 1 - Math.pow(1 - progress, 3)
+          const current = start + (end - start) * eased
+          el.textContent = (isFloat ? current.toFixed(1) : Math.floor(current)) + suffix
+          if (progress < 1) requestAnimationFrame(update)
+        }
+        requestAnimationFrame(update)
+      }
+
+      function initObservers() {
+        if (!revealObs) {
+          revealObs = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) entry.target.classList.add('visible')
+              })
+            },
+            { threshold: 0.1, rootMargin: '0px 0px -40px 0px' },
+          )
+        }
+        document
+          .querySelectorAll('.view.active .reveal:not(.visible)')
+          .forEach((el) => revealObs.observe(el))
+
+        if (!metricsObs) {
+          metricsObs = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting && !entry.target.dataset.animated) {
+                  entry.target.dataset.animated = 'true'
+                  const v = entry.target.querySelectorAll('.metric-value')
+                  animateValue(v[0], 0, 47, 'ms', 1200)
+                  animateValue(v[1], 95, 99.7, '%', 1500)
+                  animateValue(v[2], 0, 2.1, 'M+', 1400)
+                  animateValue(v[3], 0, 140, '+', 1300)
+                }
+              })
+            },
+            { threshold: 0.3 },
+          )
+        }
+        const m = document.querySelector('.view.active .metrics-inner')
+        if (m) metricsObs.observe(m)
+      }
+
+      // ============ HASH ROUTER ============
+      function setView(slug) {
+        if (!THEMES[slug]) slug = 'home'
+        document
+          .querySelectorAll('.view')
+          .forEach((v) => v.classList.toggle('active', v.dataset.view === slug))
+        const t = THEMES[slug]
+        document.title = t.title
+        document.body.style.setProperty('--accent', t.accent[0])
+        document.body.style.setProperty('--accent-dim', t.accent[1])
+        document.body.style.setProperty('--accent-glow', t.accent[2])
+        document.body.dataset.view = slug
+        window.scrollTo(0, 0)
+        initObservers()
+      }
+
+      function route() {
+        const raw = (location.hash || '').replace(/^#\/?/, '')
+        if (raw === '') return setView('home')
+        if (THEMES[raw]) return setView(raw)
+        // Not a view — treat as an in-page anchor on the current view, else fall back home.
+        const el = document.getElementById(raw)
+        if (el && el.offsetParent !== null) {
+          el.scrollIntoView({ behavior: 'smooth' })
+          return
+        }
+        setView('home')
+      }
+
+      window.addEventListener('hashchange', route)
+
+      // Smooth-scroll nav/footer links that target sections on the home view.
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('[data-scroll]')
+        if (!a) return
+        e.preventDefault()
+        const id = a.dataset.scroll
+        setView('home')
+        history.replaceState(null, '', '#/')
+        requestAnimationFrame(() =>
+          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        )
+      })
+
+      route()
+    </script>
+  </body>
+</html>
