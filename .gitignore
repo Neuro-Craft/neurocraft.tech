@@ -11,3 +11,5 @@ public/
 node_modules/
 .vercel
 .env*.local
+
+.wrangler/

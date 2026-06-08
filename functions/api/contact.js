@@ -1,13 +1,11 @@
-// Vercel serverless function: receives lead-form submissions from the site
-// and emails them via Resend (https://resend.com).
+// Cloudflare Pages Function: receives lead-form submissions from the site
+// and emails them via Resend (https://resend.com). Serves the route /api/contact.
 //
-// Required env var (set in the Vercel project):
+// Required env var (Pages project → Settings → Environment variables):
 //   RESEND_API_KEY   — your Resend API key
 // Optional overrides:
 //   CONTACT_TO       — recipient (default: dip00dip@gmail.com)
 //   CONTACT_FROM     — verified sender (default: NeuroCraft <onboarding@resend.dev>)
-//
-// No npm dependencies — uses the global fetch available in the Node runtime.
 
 const LEAD_LABELS = {
   contact: 'Contact / Get in touch',
@@ -17,20 +15,22 @@ const LEAD_LABELS = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST')
-    return res.status(405).json({ error: 'Method not allowed' })
+const json = (obj, status, headers = {}) =>
+  new Response(JSON.stringify(obj), {
+    status,
+    headers: { 'content-type': 'application/json', ...headers },
+  })
+
+export async function onRequest({ request, env }) {
+  if (request.method !== 'POST') {
+    return json({ error: 'Method not allowed' }, 405, { Allow: 'POST' })
   }
 
-  // Body can arrive parsed or as a raw string depending on the runtime.
-  let body = req.body
-  if (typeof body === 'string') {
-    try {
-      body = JSON.parse(body)
-    } catch {
-      body = {}
-    }
+  let body
+  try {
+    body = await request.json()
+  } catch {
+    body = {}
   }
   body = body || {}
 
@@ -39,25 +39,25 @@ module.exports = async function handler(req, res) {
   const honeypot = String(body.company || '').trim()
 
   // Honeypot field — bots fill it, humans never see it. Pretend success.
-  if (honeypot) return res.status(200).json({ ok: true })
+  if (honeypot) return json({ ok: true }, 200)
 
   if (!EMAIL_RE.test(email)) {
-    return res.status(400).json({ error: 'Invalid email address' })
+    return json({ error: 'Invalid email address' }, 400)
   }
 
   const label = LEAD_LABELS[type] || LEAD_LABELS.contact
 
-  const apiKey = process.env.RESEND_API_KEY
+  const apiKey = env.RESEND_API_KEY
   if (!apiKey) {
     console.error('RESEND_API_KEY is not set')
-    return res.status(500).json({ error: 'Email service not configured' })
+    return json({ error: 'Email service not configured' }, 500)
   }
 
   // Strip accidental wrapping quotes / whitespace from env values — a common
   // mistake when pasting a `Name <email@domain>` value into the dashboard.
   const clean = (v, fallback) => (v || fallback).trim().replace(/^["']|["']$/g, '').trim()
-  const to = clean(process.env.CONTACT_TO, 'dip00dip@gmail.com')
-  const from = clean(process.env.CONTACT_FROM, 'NeuroCraft <onboarding@resend.dev>')
+  const to = clean(env.CONTACT_TO, 'dip00dip@gmail.com')
+  const from = clean(env.CONTACT_FROM, 'NeuroCraft <onboarding@resend.dev>')
 
   try {
     const r = await fetch('https://api.resend.com/emails', {
@@ -81,14 +81,13 @@ module.exports = async function handler(req, res) {
     })
 
     if (!r.ok) {
-      const detail = await r.text()
-      console.error('Resend error', r.status, detail)
-      return res.status(502).json({ error: 'Failed to send email' })
+      console.error('Resend error', r.status, await r.text())
+      return json({ error: 'Failed to send email' }, 502)
     }
 
-    return res.status(200).json({ ok: true })
+    return json({ ok: true }, 200)
   } catch (err) {
     console.error('Contact handler error', err)
-    return res.status(500).json({ error: 'Unexpected error' })
+    return json({ error: 'Unexpected error' }, 500)
   }
 }

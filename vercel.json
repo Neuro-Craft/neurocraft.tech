@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "mkdir -p public && cp src/index.html public/index.html",
-  "outputDirectory": "public",
-  "installCommand": "exit 0",
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
-}
