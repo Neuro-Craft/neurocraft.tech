@@ -8,8 +8,8 @@ static site showcasing NeuroCraft's products (Dovira, Drone Simulator, and more)
 - `src/index.html` — the entire site (inline CSS/JS, no build step). It's a small
   hash-routed SPA: a company hub (`#/`) plus one view per product (`#dovira`,
   `#dronesim`).
-- `vercel.json` — deploy config. The "build" simply copies `src/index.html` into
-  `public/` and rewrites all routes to `/index.html`.
+- `functions/api/contact.js` — Cloudflare Pages Function backing the contact forms.
+- `src/_redirects` — SPA fallback (serve `/index.html` for any non-asset, non-function route).
 
 ## Adding a product
 
@@ -21,10 +21,11 @@ Open `src/index.html` and, in the inline `<script>`:
 
 ## Contact forms (email)
 
-The three forms (Get in Touch + two Request Access) POST to a Vercel serverless
-function at `api/contact.js`, which emails each submission via [Resend](https://resend.com).
+The three forms (Get in Touch + two Request Access) POST to `/api/contact`, served by a
+Cloudflare Pages Function at `functions/api/contact.js`, which emails each submission via
+[Resend](https://resend.com).
 
-Set these environment variables in the Vercel project (Settings → Environment Variables):
+Set these environment variables in the Pages project (Settings → Environment variables):
 
 | Variable | Required | Default | Notes |
 | --- | --- | --- | --- |
@@ -35,8 +36,11 @@ Set these environment variables in the Vercel project (Settings → Environment 
 Until the domain is verified in Resend, the default `onboarding@resend.dev` sender
 only delivers to the Resend account owner's email — so test with that recipient first.
 
-To test the function locally, use `vercel dev` (plain `python3 -m http.server`
-serves the static page but not the `/api` route).
+To run the function locally (serves the static page **and** the `/api` route):
+
+```bash
+npx wrangler pages dev src   # functions/ is picked up automatically
+```
 
 ## Develop locally
 
@@ -46,12 +50,21 @@ python3 -m http.server -d src 8765   # then open http://localhost:8765/
 
 (Opening `src/index.html` directly in a browser also works — hash routing runs on `file://`.)
 
-## Deploy
+## Deploy (Cloudflare Pages)
 
-Connected to Vercel. Pushing to `main` deploys to production; branches/PRs get preview URLs.
-You can also deploy from the CLI:
+Connect the repo as a Cloudflare Pages project with these build settings:
+
+| Setting | Value |
+| --- | --- |
+| Framework preset | None |
+| Build command | *(leave empty)* |
+| Build output directory | `src` |
+
+Functions in `functions/` are detected automatically (no config). Add the env vars above,
+then point the `neurocraft.tech` domain at the project under **Custom domains**.
+
+Pushing to `main` deploys production; other branches get preview URLs. From the CLI:
 
 ```bash
-vercel          # preview
-vercel --prod   # production
+npx wrangler pages deploy src   # uploads src/ + functions/
 ```

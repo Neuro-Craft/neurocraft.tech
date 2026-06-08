@@ -1,0 +1,3 @@
+# SPA fallback — serve the single-page app for any non-asset, non-function route.
+# /api/* is handled by Pages Functions (functions/api/...) and takes precedence.
+/*    /index.html   200
