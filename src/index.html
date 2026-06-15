@@ -1500,9 +1500,9 @@
         <span class="nav-logo-text">NeuroCraft</span>
       </a>
       <ul class="nav-links">
-        <li><a data-scroll="products">Products</a></li>
-        <li class="hide-sm"><a data-scroll="company">Company</a></li>
-        <li><a data-scroll="contact" class="nav-cta">Contact</a></li>
+        <li><a href="#/products" data-scroll="products">Products</a></li>
+        <li class="hide-sm"><a href="#/company" data-scroll="company">Company</a></li>
+        <li><a href="#/contact" data-scroll="contact" class="nav-cta">Contact</a></li>
       </ul>
     </nav>
 
@@ -1524,7 +1524,7 @@
               studio, many products.
             </p>
             <div class="hero-actions">
-              <a class="btn-primary" data-scroll="products">
+              <a href="#/products" class="btn-primary" data-scroll="products">
                 <svg
                   width="14"
                   height="14"
@@ -1540,7 +1540,7 @@
                 </svg>
                 Explore Products
               </a>
-              <a class="btn-secondary" data-scroll="contact">Get in Touch</a>
+              <a href="#/contact" class="btn-secondary" data-scroll="contact">Get in Touch</a>
             </div>
           </div>
         </div>
@@ -2267,10 +2267,10 @@
       <div class="footer-inner">
         <div class="footer-left">&copy; 2026 Neuro Craft Inc. All rights reserved.</div>
         <ul class="footer-links">
-          <li><a href="#/">Products</a></li>
+          <li><a href="#/products" data-scroll="products">Products</a></li>
           <li><a>Privacy</a></li>
           <li><a>Terms</a></li>
-          <li><a data-scroll="contact">Contact</a></li>
+          <li><a href="#/contact" data-scroll="contact">Contact</a></li>
         </ul>
       </div>
     </footer>
@@ -2402,6 +2402,8 @@
       }
 
       // ============ HASH ROUTER ============
+      const HOME_SECTION_IDS = new Set(['products', 'company', 'contact'])
+
       function setView(slug) {
         if (!THEMES[slug]) slug = 'home'
         document
@@ -2417,10 +2419,18 @@
         initObservers()
       }
 
+      function scrollHomeSection(id) {
+        setView('home')
+        requestAnimationFrame(() =>
+          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        )
+      }
+
       function route() {
         const raw = (location.hash || '').replace(/^#\/?/, '')
         if (raw === '') return setView('home')
         if (THEMES[raw]) return setView(raw)
+        if (HOME_SECTION_IDS.has(raw)) return scrollHomeSection(raw)
         // Not a view — treat as an in-page anchor on the current view, else fall back home.
         const el = document.getElementById(raw)
         if (el && el.offsetParent !== null) {
@@ -2438,11 +2448,12 @@
         if (!a) return
         e.preventDefault()
         const id = a.dataset.scroll
-        setView('home')
-        history.replaceState(null, '', '#/')
-        requestAnimationFrame(() =>
-          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-        )
+        const nextHash = `#/${id}`
+        if (location.hash === nextHash) {
+          scrollHomeSection(id)
+        } else {
+          location.hash = nextHash
+        }
       })
 
       // ============ LEAD FORMS -> /api/contact (Resend email) ============
