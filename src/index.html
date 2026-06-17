@@ -1277,6 +1277,111 @@
         }
       }
 
+      /* ============ CAPITALPILOT PRODUCT PREVIEW ============ */
+      .capitalpilot-preview {
+        position: relative;
+        width: 100%;
+        max-width: 560px;
+        margin-left: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        overflow: hidden;
+        box-shadow:
+          0 0 60px var(--accent-glow),
+          0 18px 60px rgba(0, 0, 0, 0.35);
+        animation: fadeSlideUp 1s ease-out 0.4s both;
+      }
+
+      .capitalpilot-browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.75rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-elevated);
+      }
+
+      .capitalpilot-window-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--text-dim);
+      }
+      .capitalpilot-window-dot:nth-child(1) {
+        background: #ff5f57;
+      }
+      .capitalpilot-window-dot:nth-child(2) {
+        background: #ffbd2e;
+      }
+      .capitalpilot-window-dot:nth-child(3) {
+        background: #28c840;
+      }
+
+      .capitalpilot-url {
+        margin-left: 0.4rem;
+        font-family: var(--font-mono);
+        font-size: 0.58rem;
+        letter-spacing: 0.08em;
+        color: var(--text-dim);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .capitalpilot-preview img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1280 / 577;
+        object-fit: cover;
+        object-position: center top;
+      }
+
+      .capitalpilot-preview-meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border-top: 1px solid var(--border);
+        background: var(--bg-card);
+      }
+
+      .capitalpilot-preview-stat {
+        padding: 1rem;
+        border-right: 1px solid var(--border);
+      }
+      .capitalpilot-preview-stat:last-child {
+        border-right: none;
+      }
+
+      .capitalpilot-preview-label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-family: var(--font-mono);
+        font-size: 0.52rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+      }
+
+      .capitalpilot-preview-value {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+      }
+
+      section.view[data-view='capitalpilot'] {
+        padding-top: 6rem;
+      }
+
+      .view[data-view='capitalpilot'] .hero h1 {
+        margin-bottom: 1.1rem;
+      }
+
+      .view[data-view='capitalpilot'] .hero-desc {
+        margin-bottom: 1.7rem;
+      }
+
       /* ============ CTA SECTION ============ */
       .cta-section {
         text-align: center;
@@ -1420,7 +1525,8 @@
           gap: 3rem;
         }
         .scanner-container,
-        .osd {
+        .osd,
+        .capitalpilot-preview {
           max-width: 400px;
           margin: 0 auto;
         }
@@ -1445,6 +1551,15 @@
         }
       }
 
+      @media (min-width: 1025px) and (max-height: 680px) {
+        section.view[data-view='capitalpilot'] {
+          padding-top: 2rem;
+        }
+        .view[data-view='capitalpilot'] .hero h1 {
+          font-size: clamp(2.7rem, 5vw, 4.8rem);
+        }
+      }
+
       @media (max-width: 640px) {
         nav {
           padding: 1rem 1.5rem;
@@ -1457,6 +1572,9 @@
         }
         section,
         .hero {
+          padding: 4rem 1.5rem;
+        }
+        section.view[data-view='capitalpilot'] {
           padding: 4rem 1.5rem;
         }
         .hero {
@@ -1486,6 +1604,16 @@
         }
         .hero-home .hero-actions {
           align-items: center;
+        }
+        .capitalpilot-preview-meta {
+          grid-template-columns: 1fr;
+        }
+        .capitalpilot-preview-stat {
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+        .capitalpilot-preview-stat:last-child {
+          border-bottom: none;
         }
       }
     </style>
@@ -2262,6 +2390,356 @@
       </section>
     </section>
 
+    <!-- ============================================================= -->
+    <!-- ========== VIEW: CAPITALPILOT ========== -->
+    <!-- ============================================================= -->
+    <section class="view" data-view="capitalpilot">
+      <div class="hero">
+        <div class="hero-content">
+          <div class="hero-left">
+            <a class="back-link" href="#/">&larr; All products</a>
+            <div class="hero-status">
+              <div class="hero-status-dot"></div>
+              <span class="hero-status-text">CapitalPilot · AI trading assistant</span>
+            </div>
+            <h1>AI guidance for<br /><em>trading risk.</em></h1>
+            <p class="hero-desc">
+              CapitalPilot helps traders manage liquidation risk, analyze active positions, and
+              receive AI-powered recommendations for Bybit bot workflows &mdash; right where
+              trading decisions happen.
+            </p>
+            <div class="hero-actions">
+              <a
+                href="https://ai-botty-assistant.vercel.app/"
+                class="btn-primary"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M7 17 17 7" />
+                  <path d="M7 7h10v10" />
+                </svg>
+                Open CapitalPilot
+              </a>
+              <a href="#capitalpilot-features" class="btn-secondary">See Features</a>
+            </div>
+          </div>
+          <div class="capitalpilot-preview" aria-label="CapitalPilot landing page preview">
+            <div class="capitalpilot-browser-bar">
+              <span class="capitalpilot-window-dot"></span>
+              <span class="capitalpilot-window-dot"></span>
+              <span class="capitalpilot-window-dot"></span>
+              <span class="capitalpilot-url">ai-botty-assistant.vercel.app</span>
+            </div>
+            <img
+              src="assets/botty-home.png"
+              alt="CapitalPilot AI trading assistant landing page"
+              loading="lazy"
+            />
+            <div class="capitalpilot-preview-meta">
+              <div class="capitalpilot-preview-stat">
+                <span class="capitalpilot-preview-label">Monitor</span>
+                <span class="capitalpilot-preview-value">Liquidation risk</span>
+              </div>
+              <div class="capitalpilot-preview-stat">
+                <span class="capitalpilot-preview-label">Analyze</span>
+                <span class="capitalpilot-preview-value">Bot positions</span>
+              </div>
+              <div class="capitalpilot-preview-stat">
+                <span class="capitalpilot-preview-label">Guide</span>
+                <span class="capitalpilot-preview-value">Capital moves</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CapitalPilot features -->
+      <section id="capitalpilot-features">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Capabilities</div>
+            <h2 class="section-title">Trading assistance built around<br /><em>risk awareness</em></h2>
+            <p class="section-desc">
+              CapitalPilot combines position context, account state, bot configuration, and AI
+              reasoning to turn noisy trading data into practical guidance.
+            </p>
+          </div>
+          <div class="capabilities-grid">
+            <div class="capability reveal">
+              <div class="capability-index">01</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="M9 12l2 2 4-5" />
+                </svg>
+              </div>
+              <h3>Liquidation Protection</h3>
+              <p>
+                Monitors active exposure and highlights liquidation pressure before it becomes a
+                forced decision.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-1">
+              <div class="capability-index">02</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M3 3v18h18" />
+                  <path d="m7 15 4-4 3 3 5-7" />
+                </svg>
+              </div>
+              <h3>Position Analysis</h3>
+              <p>
+                Reviews open positions, bot settings, and market conditions to produce contextual
+                recommendations.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-2">
+              <div class="capability-index">03</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M16 3h5v5" />
+                  <path d="M4 20 21 3" />
+                  <path d="M21 16v5h-5" />
+                  <path d="m15 15 6 6" />
+                  <path d="M4 4l5 5" />
+                </svg>
+              </div>
+              <h3>Smart Fund Management</h3>
+              <p>
+                Surfaces available balances across subaccounts and suggests safety-checked transfer
+                paths.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-1">
+              <div class="capability-index">04</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <rect x="3" y="4" width="18" height="14" rx="2" />
+                  <path d="M8 21h8" />
+                  <path d="M12 18v3" />
+                  <path d="M7 9h10" />
+                  <path d="M7 13h6" />
+                </svg>
+              </div>
+              <h3>Bot Workflow Context</h3>
+              <p>
+                Connects trading bots and assistant chat so guidance is grounded in the exact
+                workflow being managed.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-2">
+              <div class="capability-index">05</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <circle cx="7.5" cy="7.5" r="3.5" />
+                  <path d="M10 10 21 21" />
+                  <path d="m15 15 3-3 3 3-3 3" />
+                </svg>
+              </div>
+              <h3>Secure API Setup</h3>
+              <p>
+                Designed around controlled exchange API access, including read and trade permission
+                boundaries.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-3">
+              <div class="capability-index">06</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <path d="M7.5 4.21 12 6.81l4.5-2.6" />
+                  <path d="M7.5 19.79V14.6L3 12" />
+                  <path d="M21 12l-4.5 2.6v5.19" />
+                  <path d="M3.27 6.96 12 12.01l8.73-5.05" />
+                  <path d="M12 22.08V12" />
+                </svg>
+              </div>
+              <h3>Extension Delivery</h3>
+              <p>
+                Ships through a Chrome extension workflow so assistant recommendations stay close to
+                the trader's active workspace.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CapitalPilot process -->
+      <section class="how-section" id="capitalpilot-flow">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Workflow</div>
+            <h2 class="section-title">From account signal to<br /><em>actionable guidance</em></h2>
+          </div>
+          <div class="how-grid">
+            <div class="how-steps">
+              <div class="how-step reveal">
+                <div class="how-step-num">01</div>
+                <div>
+                  <h4>Install the Extension</h4>
+                  <p>
+                    Add CapitalPilot to Chrome through the extension package or developer-mode
+                    install flow.
+                  </p>
+                </div>
+              </div>
+              <div class="how-step reveal reveal-delay-1">
+                <div class="how-step-num">02</div>
+                <div>
+                  <h4>Connect Trading Bots</h4>
+                  <p>
+                    Sign in with Google and link supported bot workflows so CapitalPilot can
+                    understand the operating context.
+                  </p>
+                </div>
+              </div>
+              <div class="how-step reveal reveal-delay-2">
+                <div class="how-step-num">03</div>
+                <div>
+                  <h4>Add Exchange Keys</h4>
+                  <p>
+                    Provide controlled API access for account state, position review, and permitted
+                    trading actions.
+                  </p>
+                </div>
+              </div>
+              <div class="how-step reveal reveal-delay-3">
+                <div class="how-step-num">04</div>
+                <div>
+                  <h4>Ask for Recommendations</h4>
+                  <p>
+                    Chat with the assistant to inspect liquidation exposure, rebalance capital, and
+                    evaluate next steps.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="terminal reveal reveal-delay-2">
+              <div class="terminal-header">
+                <div class="terminal-dot"></div>
+                <div class="terminal-dot"></div>
+                <div class="terminal-dot"></div>
+                <span class="terminal-title">capitalpilot — risk review</span>
+              </div>
+              <div class="terminal-body">
+                <span class="t-line"
+                  ><span class="t-prompt">$</span>
+                  <span class="t-cmd">capitalpilot analyze --exchange bybit --scope active</span></span
+                >
+                <span class="t-line">&nbsp;</span>
+                <span class="t-line"
+                  ><span class="t-comment">-&gt; Loading bot configuration and balances...</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-success"> ✓ 4 active bots synced</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-comment">-&gt; Checking liquidation distance...</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-warn"> ! BTCUSDT exposure requires attention</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-comment">-&gt; Searching available subaccount funds...</span></span
+                >
+                <span class="t-line"
+                  ><span class="t-success"> ✓ Transfer route found: reserve -&gt; futures</span></span
+                >
+                <span class="t-line">&nbsp;</span>
+                <span class="t-line"
+                  ><span class="t-prompt">recommendation:</span>
+                  reduce risk before increasing bot size</span
+                >
+                <span class="t-line"
+                  ><span class="t-comment">Safety note: informational guidance, trader approval required.</span></span
+                >
+                <span class="t-line">&nbsp;</span>
+                <span class="t-line"
+                  ><span class="t-prompt">$</span> <span class="cursor-blink"></span
+                ></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CapitalPilot CTA -->
+      <section class="cta-section" id="capitalpilot-access">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Trading Assistant</div>
+            <h2 class="section-title">Bring CapitalPilot into your<br /><em>trading workflow</em></h2>
+            <p class="section-desc">
+              Request access, discuss supported exchange coverage, or explore a custom trading
+              assistant integration with NeuroCraft.
+            </p>
+          </div>
+          <form class="cta-form reveal reveal-delay-2" data-lead="capitalpilot-access">
+            <input
+              type="text"
+              class="hp"
+              name="company"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+            />
+            <input type="email" class="cta-input" placeholder="your@email.com" required />
+            <button type="submit" class="btn-primary">Request Access</button>
+          </form>
+        </div>
+      </section>
+    </section>
+
     <!-- ========== FOOTER ========== -->
     <footer>
       <div class="footer-inner">
@@ -2303,6 +2781,16 @@
             'Frame-exact flight physics, faithful real-world drone models, authentic OSD, networked multi-user sessions, and full replay.',
           tags: ['Simulation', 'Training', 'Networked'],
         },
+        {
+          slug: 'capitalpilot',
+          name: 'CapitalPilot',
+          status: 'live',
+          color: '#6fffc3',
+          tagline: 'AI trading assistant for Bybit bots',
+          blurb:
+            'A Chrome-extension trading companion for liquidation protection, position analysis, and safety-checked capital movement recommendations.',
+          tags: ['Trading', 'Risk', 'Assistant'],
+        },
       ]
 
       // Per-view accent theme: [accent, accent-dim, accent-glow] + document title.
@@ -2318,6 +2806,10 @@
         dronesim: {
           title: 'NeuroCraft Drone Simulator — Deterministic flight simulation',
           accent: ['#7dff4d', '#7dff4d45', '#7dff4d18'],
+        },
+        capitalpilot: {
+          title: 'CapitalPilot — AI Trading Assistant by NeuroCraft',
+          accent: ['#6fffc3', '#6fffc345', '#6fffc318'],
         },
       }
 
@@ -2461,6 +2953,7 @@
         contact: 'SENT ✓',
         'dovira-access': 'REQUESTED ✓',
         'dronesim-access': 'REQUESTED ✓',
+        'capitalpilot-access': 'REQUESTED ✓',
       }
 
       document.addEventListener('submit', async (e) => {
