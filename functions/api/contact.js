@@ -11,6 +11,7 @@ const LEAD_LABELS = {
   contact: 'Contact / Get in touch',
   'dovira-access': 'Dovira — Request Access',
   'dronesim-access': 'Drone Simulator — Request Access',
+  'capitalpilot-access': 'CapitalPilot — Request Access',
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

@@ -1,13 +1,13 @@
 # neurocraft.tech
 
 Marketing website for [NeuroCraft](https://neurocraft.tech) — a single, self-contained
-static site showcasing NeuroCraft's products (Dovira, Drone Simulator, and more).
+static site showcasing NeuroCraft's products (Dovira, Drone Simulator, CapitalPilot, and more).
 
 ## Structure
 
 - `src/index.html` — the entire site (inline CSS/JS, no build step). It's a small
   hash-routed SPA: a company hub (`#/`) plus one view per product (`#dovira`,
-  `#dronesim`).
+  `#dronesim`, `#capitalpilot`).
 - `functions/api/contact.js` — Cloudflare Pages Function backing the contact forms.
 - `src/_redirects` — SPA fallback (serve `/index.html` for any non-asset, non-function route).
 
@@ -21,7 +21,7 @@ Open `src/index.html` and, in the inline `<script>`:
 
 ## Contact forms (email)
 
-The three forms (Get in Touch + two Request Access) POST to `/api/contact`, served by a
+The four forms (Get in Touch + three Request Access) POST to `/api/contact`, served by a
 Cloudflare Pages Function at `functions/api/contact.js`, which emails each submission via
 [Resend](https://resend.com).
 
