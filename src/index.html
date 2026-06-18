@@ -1629,6 +1629,7 @@
       </a>
       <ul class="nav-links">
         <li><a href="#/products" data-scroll="products">Products</a></li>
+        <li><a href="#/services" data-scroll="services">Services</a></li>
         <li class="hide-sm"><a href="#/company" data-scroll="company">Company</a></li>
         <li><a href="#/contact" data-scroll="contact" class="nav-cta">Contact</a></li>
       </ul>
@@ -1685,6 +1686,93 @@
             </p>
           </div>
           <div class="product-grid" id="product-grid"><!-- rendered from PRODUCTS registry --></div>
+        </div>
+      </section>
+
+      <!-- Services -->
+      <section id="services">
+        <div class="section-inner">
+          <div class="reveal">
+            <div class="section-label">// Services</div>
+            <h2 class="section-title">What we <em>do</em></h2>
+            <p class="section-desc">
+              Beyond our own products, we build neural systems to order &mdash; for teams who need
+              applied AI shipped with the same rigor we hold ourselves to.
+            </p>
+          </div>
+          <div class="capabilities-grid">
+            <div class="capability reveal">
+              <div class="capability-index">01</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <path d="M12 2 3 7l9 5 9-5-9-5z" />
+                  <path d="M3 12l9 5 9-5" />
+                  <path d="M3 17l9 5 9-5" />
+                </svg>
+              </div>
+              <h3>Custom AI-enabled products</h3>
+              <p>
+                End-to-end products with AI at the core &mdash; from first prototype to production.
+                We design, build, and ship the full stack: data, models, interface, and
+                infrastructure.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-1">
+              <div class="capability-index">02</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <rect x="5" y="8" width="14" height="11" rx="2" />
+                  <path d="M12 4v4" />
+                  <circle cx="12" cy="3" r="1.5" />
+                  <circle cx="9.5" cy="13" r="1.2" />
+                  <circle cx="14.5" cy="13" r="1.2" />
+                  <path d="M2 12v3M22 12v3" />
+                </svg>
+              </div>
+              <h3>Specialized agents</h3>
+              <p>
+                Autonomous and assistive agents tuned to your domain &mdash; wired into your tools,
+                data, and workflows to reason, act, and stay reliable under real-world conditions.
+              </p>
+            </div>
+            <div class="capability reveal reveal-delay-2">
+              <div class="capability-index">03</div>
+              <div class="capability-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="1.5"
+                >
+                  <circle cx="6" cy="6" r="2" />
+                  <circle cx="6" cy="18" r="2" />
+                  <circle cx="18" cy="12" r="2" />
+                  <path d="M8 6h4l4 5M8 18h4l4-5" />
+                </svg>
+              </div>
+              <h3>Trained models for specific use cases</h3>
+              <p>
+                Models trained, fine-tuned, and evaluated for a single mission &mdash; grounded in
+                your data and benchmarked for the accuracy, speed, and trust your domain demands.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -2746,6 +2834,7 @@
         <div class="footer-left">&copy; 2026 Neuro Craft Inc. All rights reserved.</div>
         <ul class="footer-links">
           <li><a href="#/products" data-scroll="products">Products</a></li>
+          <li><a href="#/services" data-scroll="services">Services</a></li>
           <li><a>Privacy</a></li>
           <li><a>Terms</a></li>
           <li><a href="#/contact" data-scroll="contact">Contact</a></li>
@@ -2894,7 +2983,7 @@
       }
 
       // ============ HASH ROUTER ============
-      const HOME_SECTION_IDS = new Set(['products', 'company', 'contact'])
+      const HOME_SECTION_IDS = new Set(['products', 'services', 'company', 'contact'])
 
       function setView(slug) {
         if (!THEMES[slug]) slug = 'home'
