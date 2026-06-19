@@ -81,8 +81,9 @@ If the new product page has a lead form, do three small things so its emails are
    </form>
    ```
    (The hidden `.hp` input is a spam honeypot — keep it.)
-2. **`src/index.html`** — add the success label to `LEAD_SUCCESS`:
-   `'falcon-access': 'REQUESTED ✓',`
+2. **`src/index.html`** — add the success label to `LEAD_SUCCESS` (each value is an
+   `{ en, uk }` pair — see the i18n section below):
+   `'falcon-access': { en: 'REQUESTED ✓', uk: 'ЗАПИТ НАДІСЛАНО ✓' },`
 3. **`functions/api/contact.js`** — add the email subject label to `LEAD_LABELS`:
    `'falcon-access': 'Falcon — Request Access',`
 
@@ -96,6 +97,72 @@ All text is in `src/index.html`. Each product's page is under its
 `<section ... data-view="…">`. A highlighted word uses `<em>…</em>` (renders in the
 view's accent color). Example — the Drone Simulator slogan:
 `<h1>Practice real flight,<br /><em>risk-free.</em></h1>`.
+
+**English is the source of truth in the markup.** If you change or add any English copy,
+update its Ukrainian translation too — see the next section.
+
+---
+
+## Task: Translations / languages (EN · UK)
+
+The site ships in **English (default)** and **Ukrainian**, toggled by the `EN / UA`
+switch at the top-right of the nav. Everything lives in the inline `<script>` at the
+bottom of `src/index.html` — there are **no separate locale files**.
+
+**How it works.** A small i18n routine walks every text node on the page and, when
+Ukrainian is active, replaces it using the **`UK` dictionary** — keyed by the *normalized
+English text* (whitespace collapsed, trimmed). Because translation happens at the
+text-node level, SVG icons, `<em>` emphasis, and `<br>` breaks are preserved
+automatically — **you don't annotate the markup at all.** The choice persists in
+`localStorage` (`nc-lang`) and sets `<html lang>`.
+
+**To translate new or changed copy**, add an entry to the `UK` object whose **key is the
+exact English string** as it reads in the markup (collapse runs of whitespace to single
+spaces; drop the surrounding indentation). A few rules that keep it working:
+
+- For a headline with `<em>`/`<br>`, each text run is its own key. Example:
+  `<h1>Practice real flight,<br /><em>risk-free.</em></h1>` needs two keys —
+  `'Practice real flight,'` and `'risk-free.'`.
+- HTML entities are matched as their **rendered characters** — use `—` (not `&mdash;`),
+  `→` (not `&rarr;`), `←`, `·`, etc.
+- Strings from the `PRODUCTS` registry (taglines, blurbs, tags) and other JS-generated
+  text translate through the same dictionary — add their English values as keys.
+- **Anything without a `UK` key simply stays in English** (safe fallback), so a missing
+  translation degrades gracefully rather than breaking.
+
+Also update, when relevant:
+- **`TITLES_UK`** — the localized `<title>` per view (`home`, `dovira`, …).
+- **`LEAD_SUCCESS`** — form button success labels are `{ en, uk }` pairs.
+
+Deliberately **left in English**: brand/product names (Dovira, CapitalPilot, Drone
+Simulator), terminal/CLI output blocks, and HUD telemetry overlays.
+
+### Auto-detecting Ukrainian visitors
+
+On a **first visit with no saved preference**, the site defaults to Ukrainian when
+*either* signal points to Ukraine:
+
+1. **Browser language** — `navigator.languages` includes a `uk` tag (instant, no request).
+2. **Geo-IP** — the visitor's IP is in Ukraine, read from Cloudflare's edge country via
+   **`functions/api/geo.js`** (returns `{ "country": "UA" }`). Checked only if the browser
+   language didn't already decide, so most visitors never make the extra request.
+
+Key rules baked into the logic (inline `<script>`, bottom of `src/index.html`):
+
+- **A manual `EN`/`UA` click always wins.** Only explicit clicks are written to
+  `localStorage` (`nc-lang`); auto-detection is skipped entirely once a choice is stored.
+- **Auto-detected languages are *not* persisted** — they re-evaluate each fresh visit, so
+  `localStorage` only ever holds a deliberate preference.
+- If `/api/geo` is unreachable (e.g. the plain `python3 -m http.server` preview, which
+  doesn't run Functions), detection fails closed to English.
+
+`functions/api/geo.js` needs no configuration — `request.cf.country` / the `CF-IPCountry`
+header are provided automatically by Cloudflare in production and by `wrangler pages dev`
+locally (it injects a value, often `UA`, for testing).
+
+**Adding a third language** (e.g. `de`): add a parallel dictionary (`DE`) and a
+`TITLES_DE`, generalize `applyLang`/`setLang` to look up the active language's dictionary,
+and add another `<button class="lang-opt" data-lang="de">` to the `.lang-switch` in the nav.
 
 ---
 

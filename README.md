@@ -7,8 +7,11 @@ static site showcasing NeuroCraft's products (Dovira, Drone Simulator, CapitalPi
 
 - `src/index.html` — the entire site (inline CSS/JS, no build step). It's a small
   hash-routed SPA: a company hub (`#/`) plus one view per product (`#dovira`,
-  `#dronesim`, `#capitalpilot`).
+  `#dronesim`, `#capitalpilot`). It's **bilingual (English / Ukrainian)** via the
+  `EN / UA` nav switch — see the translations section in `MAINTENANCE.md`.
 - `functions/api/contact.js` — Cloudflare Pages Function backing the contact forms.
+- `functions/api/geo.js` — Cloudflare Pages Function returning the visitor's country
+  code; used to auto-default Ukrainian visitors to UK on first visit.
 - `src/_redirects` — SPA fallback (serve `/index.html` for any non-asset, non-function route).
 
 ## Adding a product

@@ -215,6 +215,40 @@
         transform: translateY(-1px);
       }
 
+      /* ============ LANGUAGE SWITCH ============ */
+      .lang-switch {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .lang-opt {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        color: var(--text-secondary);
+        padding: 0.2rem 0.15rem;
+        transition: color 0.3s;
+      }
+
+      .lang-opt:hover {
+        color: var(--accent);
+      }
+
+      .lang-opt.active {
+        color: var(--accent);
+      }
+
+      .lang-sep {
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+      }
+
       /* ============ HERO ============ */
       .hero {
         position: relative;
@@ -1649,6 +1683,11 @@
         <li><a href="#/services" data-scroll="services">Services</a></li>
         <li class="hide-sm"><a href="#/company" data-scroll="company">Company</a></li>
         <li><a href="#/contact" data-scroll="contact" class="nav-cta">Contact</a></li>
+        <li class="lang-switch" role="group" aria-label="Language">
+          <button type="button" class="lang-opt active" data-lang="en" aria-label="English">EN</button>
+          <span class="lang-sep">/</span>
+          <button type="button" class="lang-opt" data-lang="uk" aria-label="Українська">UA</button>
+        </li>
       </ul>
     </nav>
 
@@ -3008,7 +3047,7 @@
           .querySelectorAll('.view')
           .forEach((v) => v.classList.toggle('active', v.dataset.view === slug))
         const t = THEMES[slug]
-        document.title = t.title
+        document.title = currentLang === 'uk' && TITLES_UK[slug] ? TITLES_UK[slug] : t.title
         document.body.style.setProperty('--accent', t.accent[0])
         document.body.style.setProperty('--accent-dim', t.accent[1])
         document.body.style.setProperty('--accent-glow', t.accent[2])
@@ -3056,10 +3095,10 @@
 
       // ============ LEAD FORMS -> /api/contact (Resend email) ============
       const LEAD_SUCCESS = {
-        contact: 'SENT ✓',
-        'dovira-access': 'REQUESTED ✓',
-        'dronesim-access': 'REQUESTED ✓',
-        'capitalpilot-access': 'REQUESTED ✓',
+        contact: { en: 'SENT ✓', uk: 'НАДІСЛАНО ✓' },
+        'dovira-access': { en: 'REQUESTED ✓', uk: 'ЗАПИТ НАДІСЛАНО ✓' },
+        'dronesim-access': { en: 'REQUESTED ✓', uk: 'ЗАПИТ НАДІСЛАНО ✓' },
+        'capitalpilot-access': { en: 'REQUESTED ✓', uk: 'ЗАПИТ НАДІСЛАНО ✓' },
       }
 
       document.addEventListener('submit', async (e) => {
@@ -3074,7 +3113,7 @@
         const original = btn.textContent
 
         btn.disabled = true
-        btn.textContent = 'SENDING…'
+        btn.textContent = currentLang === 'uk' ? 'НАДСИЛАННЯ…' : 'SENDING…'
 
         try {
           const res = await fetch('/api/contact', {
@@ -3087,19 +3126,375 @@
             }),
           })
           if (!res.ok) throw new Error('Request failed')
-          btn.textContent = LEAD_SUCCESS[type] || 'SENT ✓'
+          btn.textContent = (LEAD_SUCCESS[type] && LEAD_SUCCESS[type][currentLang]) || 'SENT ✓'
           btn.style.background = '#28c840'
           emailInput.value = ''
         } catch {
           btn.disabled = false
-          btn.textContent = 'TRY AGAIN'
+          btn.textContent = currentLang === 'uk' ? 'СПРОБУЙТЕ ЗНОВУ' : 'TRY AGAIN'
           setTimeout(() => {
             btn.textContent = original
           }, 2500)
         }
       })
 
+      // ============ I18N (EN default · UK toggle) ============
+      // Translation works at the text-node level keyed by the normalized
+      // English string, so SVG icons, <em>, and <br> structure are preserved
+      // automatically and no markup needs per-element annotation.
+      const TITLES_UK = {
+        home: 'NeuroCraft — Нейронні системи для синтетичного світу',
+        dovira: 'Dovira — Виявлення дипфейків і наративів у реальному часі',
+        dronesim: 'NeuroCraft Drone Simulator — Детермінована симуляція польоту',
+        capitalpilot: 'CapitalPilot — AI-асистент для трейдингу від NeuroCraft',
+      }
+
+      const UK = {
+        // --- Nav / footer ---
+        Products: 'Продукти',
+        Services: 'Послуги',
+        Company: 'Компанія',
+        Contact: 'Контакти',
+        Privacy: 'Конфіденційність',
+        Terms: 'Умови',
+        '© 2026 Neuro Craft Inc. All rights reserved.':
+          '© 2026 Neuro Craft Inc. Усі права захищено.',
+
+        // --- Home hero ---
+        'NeuroCraft · Applied neural systems': 'NeuroCraft · Прикладні нейронні системи',
+        'Neural systems for a': 'Нейронні системи для',
+        synthetic: 'синтетичного',
+        'world.': 'світу.',
+        'We build production-grade AI for high-stakes, real-world domains — from detecting synthetic media to simulating flight with deterministic precision. One studio, many products.':
+          'Ми створюємо AI промислового рівня для відповідальних реальних задач — від виявлення синтетичних медіа до симуляції польоту з детермінованою точністю. Одна студія, багато продуктів.',
+        'Explore Products': 'Переглянути продукти',
+        'Get in Touch': "Зв'язатися",
+
+        // --- Products section ---
+        '// Products': '// Продукти',
+        'What we': 'Що ми',
+        build: 'створюємо',
+        'Each product is a focused neural system, engineered for a specific real-world mission.':
+          'Кожен продукт — це сфокусована нейронна система, створена для конкретної реальної місії.',
+
+        // --- Services section ---
+        '// Services': '// Послуги',
+        do: 'робимо',
+        'Beyond our own products, we build neural systems to order — for teams who need applied AI shipped with the same rigor we hold ourselves to.':
+          'Окрім власних продуктів, ми створюємо нейронні системи на замовлення — для команд, яким потрібен прикладний AI, реалізований із тією ж ретельністю, яку ми застосовуємо до себе.',
+        'Custom AI-enabled products': 'Кастомні продукти на основі AI',
+        'End-to-end products with AI at the core — from first prototype to production. We design, build, and ship the full stack: data, models, interface, and infrastructure.':
+          'Цілісні продукти з AI в основі — від першого прототипу до продакшену. Ми проєктуємо, створюємо та запускаємо весь стек: дані, моделі, інтерфейс та інфраструктуру.',
+        'Specialized agents': 'Спеціалізовані агенти',
+        'Autonomous and assistive agents tuned to your domain — wired into your tools, data, and workflows to reason, act, and stay reliable under real-world conditions.':
+          'Автономні та допоміжні агенти, налаштовані під вашу галузь — інтегровані з вашими інструментами, даними та робочими процесами, щоб міркувати, діяти й залишатися надійними в реальних умовах.',
+        'Trained models for specific use cases': 'Навчені моделі для конкретних задач',
+        'Models trained, fine-tuned, and evaluated for a single mission — grounded in your data and benchmarked for the accuracy, speed, and trust your domain demands.':
+          'Моделі, натреновані, доналаштовані та оцінені для єдиної місії — побудовані на ваших даних і перевірені на точність, швидкість і надійність, яких вимагає ваша галузь.',
+
+        // --- Company section ---
+        '// Company': '// Компанія',
+        'Built by': 'Створено',
+        'NeuroCraft is an applied-AI studio. We turn frontier neural architectures into dependable products for domains where correctness, speed, and trust are non-negotiable. We ship our own systems and partner with teams who need them.':
+          'NeuroCraft — це студія прикладного AI. Ми перетворюємо передові нейронні архітектури на надійні продукти для галузей, де коректність, швидкість і довіра не підлягають компромісу. Ми випускаємо власні системи та співпрацюємо з командами, яким вони потрібні.',
+        'Deterministic by design': 'Детермінованість за задумом',
+        'Systems you can reason about, reproduce, and trust under pressure.':
+          'Системи, які можна осмислити, відтворити й яким можна довіряти під тиском.',
+        'Real-world fidelity': 'Відповідність реальності',
+        'Models grounded in how the physical and information world actually behaves.':
+          'Моделі, що ґрунтуються на тому, як насправді поводиться фізичний та інформаційний світ.',
+        'Built to scale': 'Створено для масштабування',
+        'From a single laptop to networked, multi-user deployments.':
+          'Від одного ноутбука до мережевих багатокористувацьких розгортань.',
+
+        // --- Contact section ---
+        '// Contact': '// Контакти',
+        "Let's build something": 'Створімо щось,',
+        'that matters': 'що має значення',
+        'Partner with NeuroCraft, request access to a product, or just say hello.':
+          'Співпрацюйте з NeuroCraft, запросіть доступ до продукту або просто привітайтеся.',
+
+        // --- Product hub cards ---
+        Live: 'Активний',
+        'Coming soon': 'Незабаром',
+        'Explore →': 'Детальніше →',
+        'More to come': 'Більше попереду',
+        'New systems in the lab': 'Нові системи в лабораторії',
+        'NeuroCraft is expanding. Additional neural systems are in development.':
+          'NeuroCraft зростає. Нові нейронні системи в розробці.',
+        'Real-time deepfake & narrative detection':
+          'Виявлення дипфейків і наративів у реальному часі',
+        'Multi-modal neural detection of deepfakes, voice clones, and coordinated false narratives — in real time, before they spread.':
+          'Мультимодальне нейронне виявлення дипфейків, клонів голосу та скоординованих фейкових наративів — у реальному часі, перш ніж вони поширяться.',
+        'Deterministic drone flight simulation': 'Детермінована симуляція польоту дронів',
+        'Frame-exact flight physics, faithful real-world drone models, authentic OSD, networked multi-user sessions, and full replay.':
+          'Покадрово точна фізика польоту, достовірні моделі реальних дронів, автентичний OSD, мережеві багатокористувацькі сесії та повний реплей.',
+        'AI trading assistant for Bybit bots': 'AI-асистент для трейдингу на ботах Bybit',
+        'A Chrome-extension trading companion for liquidation protection, position analysis, and safety-checked capital movement recommendations.':
+          'Трейдинговий помічник у вигляді розширення Chrome для захисту від ліквідації, аналізу позицій і безпечних рекомендацій щодо руху капіталу.',
+        Detection: 'Виявлення',
+        Forensics: 'Форензика',
+        'Threat Intel': 'Аналітика загроз',
+        Simulation: 'Симуляція',
+        Training: 'Тренування',
+        Networked: 'Мережевий',
+        Trading: 'Трейдинг',
+        Risk: 'Ризик',
+        Assistant: 'Асистент',
+
+        // --- Shared product-view actions ---
+        '← All products': '← Усі продукти',
+        'Request Access': 'Запросити доступ',
+        'See Features': 'Переглянути можливості',
+        '// Early Access': '// Ранній доступ',
+        '// Capabilities': '// Можливості',
+
+        // --- Dovira ---
+        'Dovira · Active threat monitoring': 'Dovira · Активний моніторинг загроз',
+        'Truth has a': 'У правди є',
+        'frequency.': 'частота.',
+        'We detect it.': 'Ми її виявляємо.',
+        'Dovira deploys advanced neural architectures to identify deepfakes, synthetic media, and coordinated false narratives in real time — before they spread.':
+          'Dovira застосовує передові нейронні архітектури для виявлення дипфейків, синтетичних медіа та скоординованих фейкових наративів у реальному часі — перш ніж вони поширяться.',
+        'See How It Works': 'Як це працює',
+        'Avg Detection Latency': 'Сер. затримка виявлення',
+        'Deepfake Accuracy': 'Точність на дипфейках',
+        'Threats Flagged Daily': 'Загроз позначається щодня',
+        'Languages Supported': 'Підтримуваних мов',
+        '// Core Capabilities': '// Ключові можливості',
+        'Six layers of': 'Шість рівнів',
+        defense: 'захисту',
+        'against synthetic deception': 'проти синтетичного обману',
+        'Our multi-modal detection engine analyzes content across visual, auditory, linguistic, and behavioral dimensions simultaneously.':
+          'Наш мультимодальний рушій виявлення аналізує контент одночасно за візуальними, аудіо, лінгвістичними та поведінковими ознаками.',
+        'Face Forgery Detection': 'Виявлення підробки облич',
+        'Identifies GAN-generated faces, face swaps, and reenactment artifacts using spectral analysis and micro-expression tracking.':
+          'Виявляє згенеровані GAN обличчя, заміну облич та артефакти реконструкції за допомогою спектрального аналізу й відстеження мікровиразів.',
+        'Voice Clone Detection': 'Виявлення клонів голосу',
+        'Detects synthetic speech, cloned voices, and audio splicing through prosodic analysis and neural voiceprint matching.':
+          'Виявляє синтетичне мовлення, клоновані голоси та склейку аудіо через просодичний аналіз і нейронне зіставлення голосових відбитків.',
+        'Narrative Graph Analysis': 'Аналіз графа наративів',
+        'Maps coordinated inauthentic behavior and narrative propagation networks using temporal graph neural networks.':
+          'Картографує скоординовану неавтентичну поведінку та мережі поширення наративів за допомогою темпоральних графових нейромереж.',
+        'Provenance Tracking': 'Відстеження походження',
+        'Traces media origin through cryptographic watermark analysis, EXIF forensics, and blockchain-verified content chains.':
+          'Простежує походження медіа через аналіз криптографічних водяних знаків, EXIF-форензику та блокчейн-підтверджені ланцюги контенту.',
+        'Real-Time Stream Analysis': 'Аналіз потоків у реальному часі',
+        'Monitors live broadcasts, social feeds, and messaging platforms with sub-100ms detection latency at scale.':
+          'Моніторить прямі трансляції, стрічки соцмереж і месенджери із затримкою виявлення менше 100 мс у масштабі.',
+        'Threat Intelligence': 'Розвідка загроз',
+        'Aggregates global disinformation patterns into actionable intelligence reports with attribution confidence scoring.':
+          'Агрегує глобальні патерни дезінформації у практичні аналітичні звіти з оцінкою впевненості в атрибуції.',
+        '// Process': '// Процес',
+        'From ingestion to': 'Від отримання до',
+        verdict: 'вердикту',
+        'in milliseconds': 'за мілісекунди',
+        'Ingest & Decompose': 'Отримання та декомпозиція',
+        'Content is ingested via API, browser extension, or platform integration. Multi-modal decomposition separates visual, audio, and textual signals for parallel analysis.':
+          'Контент отримується через API, розширення браузера або інтеграцію з платформою. Мультимодальна декомпозиція розділяє візуальні, аудіо та текстові сигнали для паралельного аналізу.',
+        'Neural Analysis Pipeline': 'Конвеєр нейронного аналізу',
+        'Specialized detection models run simultaneously — facial forensics, voice authentication, semantic consistency, and provenance verification through our ensemble architecture.':
+          'Спеціалізовані моделі виявлення працюють одночасно — форензика облич, автентифікація голосу, семантична узгодженість і перевірка походження через нашу ансамблеву архітектуру.',
+        'Cross-Signal Correlation': 'Кореляція сигналів',
+        'Results are fused across modalities. A video with authentic faces but synthetic audio triggers cross-modal flags. Narrative patterns are checked against our threat knowledge graph.':
+          'Результати поєднуються між модальностями. Відео зі справжніми обличчями, але синтетичним аудіо спричиняє крос-модальні позначки. Наративні патерни звіряються з нашим графом знань про загрози.',
+        'Verdict & Response': 'Вердикт і реакція',
+        'A confidence-scored verdict is delivered with full explainability — highlighting exactly which signals triggered detection and providing forensic evidence chains.':
+          'Вердикт з оцінкою впевненості надається з повною поясненістю — вказуючи, які саме сигнали спричинили виявлення, і надаючи ланцюги криміналістичних доказів.',
+        '// Live Detection Feed': '// Стрічка виявлень у реальному часі',
+        Recent: 'Нещодавні',
+        detections: 'виявлення',
+        Deepfake: 'Дипфейк',
+        'False Narrative': 'Фейковий наратив',
+        'Verified Authentic': 'Підтверджено справжнє',
+        'Synthetic video of public official detected across 12 platforms':
+          'Синтетичне відео посадовця виявлено на 12 платформах',
+        'GAN-generated face swap on legitimate broadcast footage. Propagation traced to coordinated network of 340+ accounts.':
+          'Згенерована GAN заміна обличчя на справжніх кадрах трансляції. Поширення відстежено до скоординованої мережі з 340+ акаунтів.',
+        'Detection confidence:': 'Впевненість виявлення:',
+        'Coordinated inauthentic narrative seeded in financial markets':
+          'Скоординований неавтентичний наратив, запущений на фінансових ринках',
+        'Fabricated earnings report circulated through synthetic news sites and amplified via bot networks to manipulate stock price.':
+          'Сфабрикований звіт про прибутки поширювався через фейкові новинні сайти й посилювався ботомережами для маніпуляції ціною акцій.',
+        'Disputed emergency broadcast confirmed as genuine':
+          'Спірну екстрену трансляцію підтверджено як справжню',
+        'Media authenticated via provenance chain and cross-referenced with 4 independent sources. Cryptographic watermark intact.':
+          'Медіа автентифіковано через ланцюг походження та звірено з 4 незалежними джерелами. Криптографічний водяний знак цілий.',
+        'Authenticity confidence:': 'Впевненість у справжності:',
+        'Defend truth': 'Захищайте правду',
+        at: 'на',
+        'machine speed': 'машинній швидкості',
+        "Join our early access program and deploy Dovira's detection engine in your organization.":
+          'Приєднуйтеся до програми раннього доступу та розгорніть рушій виявлення Dovira у вашій організації.',
+
+        // --- Drone Simulator ---
+        'Drone Simulator · Flight-true physics': 'Drone Simulator · Достовірна фізика польоту',
+        'Practice real flight,': 'Практикуйте справжній політ,',
+        'risk-free.': 'без ризику.',
+        'A drone simulator with realistic, deterministic physics and faithful models of real-world airframes — from OSD to control response. Train solo or in networked multi-user sessions, then replay every flight.':
+          'Симулятор дронів із реалістичною детермінованою фізикою та достовірними моделями реальних планерів — від OSD до реакції на керування. Тренуйтеся соло або в мережевих багатокористувацьких сесіях, а потім переглядайте кожен політ.',
+        'Simulation that behaves': 'Симуляція, що поводиться',
+        like: 'як',
+        reality: 'реальність',
+        'Every system is tuned for fidelity and reproducibility — what you learn in the sim transfers to the field.':
+          'Кожна система налаштована на достовірність і відтворюваність — те, що ви вивчаєте в симуляторі, переноситься в поле.',
+        'Deterministic Physics': 'Детермінована фізика',
+        'Realistic, frame-exact flight dynamics. The same inputs produce the same flight every single run — ideal for training and analysis.':
+          'Реалістична, покадрово точна динаміка польоту. Однакові вхідні дані дають однаковий політ за кожен запуск — ідеально для тренувань і аналізу.',
+        'Scalable Visuals': 'Масштабована графіка',
+        'Runs from low-spec laptops to high-fidelity GPUs. Visual quality scales without ever changing how the aircraft flies.':
+          'Працює від слабких ноутбуків до потужних відеокарт. Якість графіки масштабується, ніколи не змінюючи того, як літає апарат.',
+        'Real Drone Models': 'Реальні моделі дронів',
+        'Faithful simulations of real-life drone models — airframes, motors, and control response close to their real-world counterparts.':
+          'Достовірні симуляції реальних моделей дронів — планери, мотори та реакція на керування, близькі до їхніх реальних відповідників.',
+        'Authentic OSD': 'Автентичний OSD',
+        "On-screen displays and telemetry overlays matched closely to real hardware, so the interface feels exactly like the cockpit you'll fly.":
+          'Екранні індикатори та оверлеї телеметрії, наближені до справжнього обладнання, тож інтерфейс відчувається точно як кабіна, у якій ви літатимете.',
+        'Multi-User Networking': 'Багатокористувацька мережа',
+        'Shared, networked environments for squads, instructors, and races — fly together in the same synchronized world.':
+          'Спільні мережеві середовища для команд, інструкторів і перегонів — літайте разом в одному синхронізованому світі.',
+        'Full Replay': 'Повний реплей',
+        'Record and rewind any session. Scrub, review, and analyze every flight for training, debriefs, and incident reconstruction.':
+          'Записуйте й перемотуйте будь-яку сесію. Прокручуйте, переглядайте й аналізуйте кожен політ для тренувань, розборів і реконструкції інцидентів.',
+        'Get in the': 'Сідайте в',
+        cockpit: 'кабіну',
+        'Request access to the NeuroCraft Drone Simulator for training, research, or competition.':
+          'Запросіть доступ до NeuroCraft Drone Simulator для тренувань, досліджень або змагань.',
+
+        // --- CapitalPilot ---
+        'CapitalPilot · AI trading assistant': 'CapitalPilot · AI-асистент для трейдингу',
+        'AI guidance for': 'AI-поради щодо',
+        'trading risk.': 'торгового ризику.',
+        'CapitalPilot helps traders manage liquidation risk, analyze active positions, and receive AI-powered recommendations for Bybit bot workflows — right where trading decisions happen.':
+          'CapitalPilot допомагає трейдерам керувати ризиком ліквідації, аналізувати активні позиції та отримувати рекомендації на основі AI для роботи з ботами Bybit — там, де ухвалюються торгові рішення.',
+        'Open CapitalPilot': 'Відкрити CapitalPilot',
+        Monitor: 'Моніторинг',
+        'Liquidation risk': 'Ризик ліквідації',
+        Analyze: 'Аналіз',
+        'Bot positions': 'Позиції ботів',
+        Guide: 'Поради',
+        'Capital moves': 'Рух капіталу',
+        'Trading assistance built around': 'Торговий асистент, побудований навколо',
+        'risk awareness': 'усвідомлення ризику',
+        'CapitalPilot combines position context, account state, bot configuration, and AI reasoning to turn noisy trading data into practical guidance.':
+          'CapitalPilot поєднує контекст позицій, стан рахунку, конфігурацію ботів та AI-міркування, щоб перетворити шумні торгові дані на практичні поради.',
+        'Liquidation Protection': 'Захист від ліквідації',
+        'Monitors active exposure and highlights liquidation pressure before it becomes a forced decision.':
+          'Моніторить активну експозицію та підсвічує тиск ліквідації, перш ніж це стане вимушеним рішенням.',
+        'Position Analysis': 'Аналіз позицій',
+        'Reviews open positions, bot settings, and market conditions to produce contextual recommendations.':
+          'Аналізує відкриті позиції, налаштування ботів і ринкові умови, щоб надати контекстні рекомендації.',
+        'Smart Fund Management': 'Розумне керування коштами',
+        'Surfaces available balances across subaccounts and suggests safety-checked transfer paths.':
+          'Показує доступні баланси на субрахунках і пропонує перевірені на безпеку шляхи переказів.',
+        'Bot Workflow Context': 'Контекст роботи ботів',
+        'Connects trading bots and assistant chat so guidance is grounded in the exact workflow being managed.':
+          'Поєднує торгових ботів і чат-асистента, щоб поради ґрунтувалися на конкретному робочому процесі.',
+        'Secure API Setup': 'Безпечне налаштування API',
+        'Designed around controlled exchange API access, including read and trade permission boundaries.':
+          'Побудовано навколо контрольованого доступу до API біржі, включно з межами дозволів на читання та торгівлю.',
+        'Extension Delivery': 'Доставка через розширення',
+        "Ships through a Chrome extension workflow so assistant recommendations stay close to the trader's active workspace.":
+          'Постачається через розширення Chrome, тож рекомендації асистента залишаються поруч з активним робочим простором трейдера.',
+        '// Workflow': '// Робочий процес',
+        'From account signal to': 'Від сигналу рахунку до',
+        'actionable guidance': 'практичних порад',
+        'Install the Extension': 'Встановіть розширення',
+        'Add CapitalPilot to Chrome through the extension package or developer-mode install flow.':
+          'Додайте CapitalPilot до Chrome через пакет розширення або встановлення в режимі розробника.',
+        'Connect Trading Bots': 'Підключіть торгових ботів',
+        'Sign in with Google and link supported bot workflows so CapitalPilot can understand the operating context.':
+          'Увійдіть через Google та підключіть підтримувані робочі процеси ботів, щоб CapitalPilot розумів операційний контекст.',
+        'Add Exchange Keys': 'Додайте ключі біржі',
+        'Provide controlled API access for account state, position review, and permitted trading actions.':
+          'Надайте контрольований доступ до API для стану рахунку, перегляду позицій і дозволених торгових дій.',
+        'Ask for Recommendations': 'Запитуйте рекомендації',
+        'Chat with the assistant to inspect liquidation exposure, rebalance capital, and evaluate next steps.':
+          'Спілкуйтеся з асистентом, щоб перевірити ризик ліквідації, перебалансувати капітал і оцінити наступні кроки.',
+        '// Trading Assistant': '// Торговий асистент',
+        'Bring CapitalPilot into your': 'Додайте CapitalPilot до свого',
+        'trading workflow': 'торгового процесу',
+        'Request access, discuss supported exchange coverage, or explore a custom trading assistant integration with NeuroCraft.':
+          'Запросіть доступ, обговоріть підтримувані біржі або розгляньте кастомну інтеграцію торгового асистента з NeuroCraft.',
+      }
+
+      let currentLang = localStorage.getItem('nc-lang') === 'uk' ? 'uk' : 'en'
+      const normI18n = (s) => s.replace(/\s+/g, ' ').trim()
+      let i18nNodes = null
+
+      function collectI18nNodes() {
+        i18nNodes = []
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+          acceptNode(n) {
+            if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT
+            const tag = n.parentNode && n.parentNode.nodeName
+            if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT
+            return UK[normI18n(n.nodeValue)] ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+          },
+        })
+        let n
+        while ((n = walker.nextNode())) i18nNodes.push({ node: n, en: n.nodeValue })
+      }
+
+      function applyLang(lang) {
+        if (!i18nNodes) collectI18nNodes()
+        i18nNodes.forEach(({ node, en }) => {
+          if (lang === 'uk') {
+            const t = UK[normI18n(en)]
+            if (!t) return
+            const edge = en.match(/^(\s*)[\s\S]*?(\s*)$/)
+            node.nodeValue = (edge ? edge[1] : '') + t + (edge ? edge[2] : '')
+          } else {
+            node.nodeValue = en
+          }
+        })
+      }
+
+      // persist=true marks an explicit user choice (a nav EN/UA click). Only those
+      // are saved; auto-detected languages are re-evaluated on each fresh visit, so
+      // localStorage holds the visitor's deliberate preference and nothing else.
+      function setLang(lang, persist) {
+        currentLang = lang === 'uk' ? 'uk' : 'en'
+        if (persist) localStorage.setItem('nc-lang', currentLang)
+        document.documentElement.lang = currentLang
+        applyLang(currentLang)
+        document
+          .querySelectorAll('.lang-opt')
+          .forEach((b) => b.classList.toggle('active', b.dataset.lang === currentLang))
+        const slug = document.body.dataset.view
+        const theme = THEMES[slug]
+        if (theme)
+          document.title =
+            currentLang === 'uk' && TITLES_UK[slug] ? TITLES_UK[slug] : theme.title
+      }
+
+      document
+        .querySelectorAll('.lang-opt')
+        .forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang, true)))
+
       route()
+      setLang(currentLang, false)
+
+      // First-visit auto-detect (no explicit choice yet): default Ukrainian visitors
+      // to UK. Triggers on a Ukrainian browser language OR a Ukraine IP (Cloudflare
+      // edge geo via /api/geo). A manual EN/UA click always wins and disables this.
+      if (localStorage.getItem('nc-lang') === null) {
+        const prefersUk = (navigator.languages || [navigator.language || '']).some((l) =>
+          /^uk\b/i.test(l),
+        )
+        if (prefersUk) {
+          setLang('uk', false)
+        } else {
+          fetch('/api/geo')
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+              // Re-check the guard — the visitor may have clicked while we waited.
+              if (d && d.country === 'UA' && localStorage.getItem('nc-lang') === null)
+                setLang('uk', false)
+            })
+            .catch(() => {})
+        }
+      }
     </script>
   </body>
 </html>
