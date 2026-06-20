@@ -1311,97 +1311,204 @@
         }
       }
 
-      /* ============ CAPITALPILOT PRODUCT PREVIEW ============ */
-      .capitalpilot-preview {
+      /* ============ CAPITALPILOT TRADING VISUAL (amber, themed) ============ */
+      .cp-visual {
         position: relative;
         width: 100%;
-        max-width: 560px;
+        max-width: 540px;
+        aspect-ratio: 1;
         margin-left: auto;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: var(--bg-card);
-        overflow: hidden;
-        box-shadow:
-          0 0 60px var(--accent-glow),
-          0 18px 60px rgba(0, 0, 0, 0.35);
         animation: fadeSlideUp 1s ease-out 0.4s both;
       }
 
-      .capitalpilot-browser-bar {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        padding: 0.75rem 0.9rem;
-        border-bottom: 1px solid var(--border);
-        background: var(--bg-elevated);
-      }
-
-      .capitalpilot-window-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: var(--text-dim);
-      }
-      .capitalpilot-window-dot:nth-child(1) {
-        background: #ff5f57;
-      }
-      .capitalpilot-window-dot:nth-child(2) {
-        background: #ffbd2e;
-      }
-      .capitalpilot-window-dot:nth-child(3) {
-        background: #28c840;
-      }
-
-      .capitalpilot-url {
-        margin-left: 0.4rem;
-        font-family: var(--font-mono);
-        font-size: 0.58rem;
-        letter-spacing: 0.08em;
-        color: var(--text-dim);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .capitalpilot-preview img {
-        display: block;
+      .cp-svg {
         width: 100%;
-        aspect-ratio: 1280 / 577;
-        object-fit: cover;
-        object-position: center top;
-      }
-
-      .capitalpilot-preview-meta {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        border-top: 1px solid var(--border);
-        background: var(--bg-card);
-      }
-
-      .capitalpilot-preview-stat {
-        padding: 1rem;
-        border-right: 1px solid var(--border);
-      }
-      .capitalpilot-preview-stat:last-child {
-        border-right: none;
-      }
-
-      .capitalpilot-preview-label {
+        height: 100%;
         display: block;
-        margin-bottom: 0.35rem;
+        overflow: visible;
+      }
+
+      .cp-grid line {
+        stroke: rgba(255, 255, 255, 0.05);
+        stroke-width: 1;
+      }
+
+      .cp-area {
+        animation: cp-area-breathe 6s ease-in-out infinite;
+      }
+      @keyframes cp-area-breathe {
+        0%,
+        100% {
+          opacity: 0.65;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* Candlesticks grow in once, staggered, from their base. */
+      .cp-candle {
+        transform-box: fill-box;
+        transform-origin: bottom;
+        animation: cp-grow 0.6s ease-out var(--d, 0s) both;
+      }
+      @keyframes cp-grow {
+        from {
+          transform: scaleY(0);
+          opacity: 0;
+        }
+        to {
+          transform: scaleY(1);
+          opacity: 1;
+        }
+      }
+
+      .cp-wick {
+        stroke-width: 2;
+      }
+      .cp-wick.up {
+        stroke: #28c840;
+      }
+      .cp-wick.down {
+        stroke: var(--red-alert);
+      }
+      .cp-body {
+        rx: 2;
+      }
+      .cp-body.up {
+        fill: #28c840;
+      }
+      .cp-body.down {
+        fill: var(--red-alert);
+      }
+
+      /* Price/trend line draws itself in, then the area + dot keep it alive. */
+      .cp-trend {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: drop-shadow(0 0 6px var(--accent-dim));
+        stroke-dasharray: 520;
+        stroke-dashoffset: 520;
+        animation: cp-draw 2s ease-out 0.8s forwards;
+      }
+      @keyframes cp-draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      .cp-dot {
+        fill: var(--accent);
+        filter: drop-shadow(0 0 6px var(--accent));
+        /* Hidden until its animateMotion begins (2.4s) so it doesn't rest at 0,0. */
+        opacity: 0;
+        animation: cp-dot-in 0.01s linear 2.4s forwards;
+      }
+      @keyframes cp-dot-in {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .cp-marker-ring {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 2;
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: cp-marker 2.4s ease-in-out infinite;
+      }
+      @keyframes cp-marker {
+        0%,
+        100% {
+          transform: scale(0.7);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.3);
+          opacity: 0.25;
+        }
+      }
+      .cp-marker-core {
+        fill: var(--accent);
+        filter: drop-shadow(0 0 8px var(--accent));
+      }
+
+      /* Vertical analysis sweep across the chart. */
+      .cp-scan {
+        stroke: var(--accent);
+        stroke-width: 2;
+        filter: drop-shadow(0 0 8px var(--accent));
+        animation: cp-scan 4.5s linear infinite;
+      }
+      @keyframes cp-scan {
+        0% {
+          transform: translateX(0);
+          opacity: 0;
+        }
+        12% {
+          opacity: 0.5;
+        }
+        88% {
+          opacity: 0.5;
+        }
+        100% {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+
+      /* Floating telemetry labels (kept in English, like the Dovira HUD). */
+      .cp-points {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .cp-point {
+        position: absolute;
         font-family: var(--font-mono);
-        font-size: 0.52rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
+        font-size: 0.55rem;
+        letter-spacing: 0.1em;
         color: var(--text-dim);
+        white-space: nowrap;
+        animation: data-fade 3s ease-in-out infinite;
       }
-
-      .capitalpilot-preview-value {
-        display: block;
-        font-family: var(--font-mono);
-        font-size: 0.68rem;
-        letter-spacing: 0.08em;
+      .cp-point.up {
+        color: #28c840;
+      }
+      .cp-point.down {
+        color: var(--red-alert);
+      }
+      .cp-point.warn {
         color: var(--accent);
+      }
+      .cp-point:nth-child(1) {
+        top: 7%;
+        left: 4%;
+        animation-delay: 0s;
+      }
+      .cp-point:nth-child(2) {
+        top: 15%;
+        right: 4%;
+        animation-delay: 0.6s;
+      }
+      .cp-point:nth-child(3) {
+        top: 45%;
+        right: 1%;
+        animation-delay: 1.2s;
+      }
+      .cp-point:nth-child(4) {
+        bottom: 16%;
+        left: 4%;
+        animation-delay: 1.8s;
+      }
+      .cp-point:nth-child(5) {
+        bottom: 30%;
+        right: 7%;
+        animation-delay: 2.4s;
       }
 
       section.view[data-view='capitalpilot'] {
@@ -1560,7 +1667,7 @@
         }
         .scanner-container,
         .osd,
-        .capitalpilot-preview {
+        .cp-visual {
           max-width: 400px;
           margin: 0 auto;
         }
@@ -1638,16 +1745,6 @@
         }
         .hero-home .hero-actions {
           align-items: center;
-        }
-        .capitalpilot-preview-meta {
-          grid-template-columns: 1fr;
-        }
-        .capitalpilot-preview-stat {
-          border-right: none;
-          border-bottom: 1px solid var(--border);
-        }
-        .capitalpilot-preview-stat:last-child {
-          border-bottom: none;
         }
       }
 
@@ -2575,31 +2672,96 @@
               <a href="#capitalpilot-features" class="btn-secondary">See Features</a>
             </div>
           </div>
-          <div class="capitalpilot-preview" aria-label="CapitalPilot landing page preview">
-            <div class="capitalpilot-browser-bar">
-              <span class="capitalpilot-window-dot"></span>
-              <span class="capitalpilot-window-dot"></span>
-              <span class="capitalpilot-window-dot"></span>
-              <span class="capitalpilot-url">ai-botty-assistant.vercel.app</span>
-            </div>
-            <img
-              src="assets/botty-home.png"
-              alt="CapitalPilot AI trading assistant landing page"
-              loading="lazy"
-            />
-            <div class="capitalpilot-preview-meta">
-              <div class="capitalpilot-preview-stat">
-                <span class="capitalpilot-preview-label">Monitor</span>
-                <span class="capitalpilot-preview-value">Liquidation risk</span>
-              </div>
-              <div class="capitalpilot-preview-stat">
-                <span class="capitalpilot-preview-label">Analyze</span>
-                <span class="capitalpilot-preview-value">Bot positions</span>
-              </div>
-              <div class="capitalpilot-preview-stat">
-                <span class="capitalpilot-preview-label">Guide</span>
-                <span class="capitalpilot-preview-value">Capital moves</span>
-              </div>
+          <div class="cp-visual" role="img" aria-label="CapitalPilot live risk and position chart">
+            <svg class="cp-svg" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="cpArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f5b84b" stop-opacity="0.3" />
+                  <stop offset="100%" stop-color="#f5b84b" stop-opacity="0" />
+                </linearGradient>
+                <radialGradient id="cpGlow" cx="52%" cy="40%" r="55%">
+                  <stop offset="0%" stop-color="#f5b84b" stop-opacity="0.12" />
+                  <stop offset="100%" stop-color="#f5b84b" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+
+              <rect x="0" y="0" width="480" height="480" fill="url(#cpGlow)" />
+
+              <g class="cp-grid">
+                <line x1="40" y1="120" x2="440" y2="120" />
+                <line x1="40" y1="180" x2="440" y2="180" />
+                <line x1="40" y1="240" x2="440" y2="240" />
+                <line x1="40" y1="300" x2="440" y2="300" />
+                <line x1="40" y1="360" x2="440" y2="360" />
+              </g>
+
+              <!-- Area under the price line -->
+              <path
+                class="cp-area"
+                d="M70 270 L120 250 L170 216 L220 250 L270 192 L320 166 L370 202 L420 128 L420 360 L70 360 Z"
+                fill="url(#cpArea)"
+              />
+
+              <!-- Candlesticks (green = up, red = down) -->
+              <g class="cp-candles">
+                <g class="cp-candle" style="--d: 0.45s">
+                  <line class="cp-wick down" x1="70" y1="245" x2="70" y2="315" />
+                  <rect class="cp-body down" x="62" y="265" width="16" height="45" />
+                </g>
+                <g class="cp-candle" style="--d: 0.55s">
+                  <line class="cp-wick up" x1="120" y1="228" x2="120" y2="302" />
+                  <rect class="cp-body up" x="112" y="248" width="16" height="50" />
+                </g>
+                <g class="cp-candle" style="--d: 0.65s">
+                  <line class="cp-wick up" x1="170" y1="198" x2="170" y2="262" />
+                  <rect class="cp-body up" x="162" y="214" width="16" height="44" />
+                </g>
+                <g class="cp-candle" style="--d: 0.75s">
+                  <line class="cp-wick down" x1="220" y1="208" x2="220" y2="268" />
+                  <rect class="cp-body down" x="212" y="226" width="16" height="36" />
+                </g>
+                <g class="cp-candle" style="--d: 0.85s">
+                  <line class="cp-wick up" x1="270" y1="172" x2="270" y2="238" />
+                  <rect class="cp-body up" x="262" y="190" width="16" height="44" />
+                </g>
+                <g class="cp-candle" style="--d: 0.95s">
+                  <line class="cp-wick up" x1="320" y1="148" x2="320" y2="208" />
+                  <rect class="cp-body up" x="312" y="164" width="16" height="40" />
+                </g>
+                <g class="cp-candle" style="--d: 1.05s">
+                  <line class="cp-wick down" x1="370" y1="158" x2="370" y2="212" />
+                  <rect class="cp-body down" x="362" y="176" width="16" height="30" />
+                </g>
+                <g class="cp-candle" style="--d: 1.15s">
+                  <line class="cp-wick up" x1="420" y1="108" x2="420" y2="178" />
+                  <rect class="cp-body up" x="412" y="124" width="16" height="48" />
+                </g>
+              </g>
+
+              <!-- Price/trend line + the AI marker tracking the latest close -->
+              <path
+                id="cpTrend"
+                class="cp-trend"
+                d="M70 270 L120 250 L170 216 L220 250 L270 192 L320 166 L370 202 L420 128"
+              />
+              <circle class="cp-dot" r="5">
+                <animateMotion dur="4.5s" begin="2.4s" repeatCount="indefinite">
+                  <mpath href="#cpTrend" />
+                </animateMotion>
+              </circle>
+              <circle class="cp-marker-ring" cx="420" cy="128" r="11" />
+              <circle class="cp-marker-core" cx="420" cy="128" r="3.5" />
+
+              <!-- Vertical analysis sweep -->
+              <line class="cp-scan" x1="40" y1="80" x2="40" y2="384" />
+            </svg>
+
+            <div class="cp-points">
+              <span class="cp-point">BTC/USDT</span>
+              <span class="cp-point up">PnL +3.2%</span>
+              <span class="cp-point warn">RISK 24%</span>
+              <span class="cp-point">LIQ 0.0</span>
+              <span class="cp-point up">BOT ✓</span>
             </div>
           </div>
         </div>
@@ -3368,12 +3530,6 @@
         'CapitalPilot helps traders manage liquidation risk, analyze active positions, and receive AI-powered recommendations for Bybit bot workflows — right where trading decisions happen.':
           'CapitalPilot допомагає трейдерам керувати ризиком ліквідації, аналізувати активні позиції та отримувати рекомендації на основі AI для роботи з ботами Bybit — там, де ухвалюються торгові рішення.',
         'Open CapitalPilot': 'Відкрити CapitalPilot',
-        Monitor: 'Моніторинг',
-        'Liquidation risk': 'Ризик ліквідації',
-        Analyze: 'Аналіз',
-        'Bot positions': 'Позиції ботів',
-        Guide: 'Поради',
-        'Capital moves': 'Рух капіталу',
         'Trading assistance built around': 'Торговий асистент, побудований навколо',
         'risk awareness': 'усвідомлення ризику',
         'CapitalPilot combines position context, account state, bot configuration, and AI reasoning to turn noisy trading data into practical guidance.':
@@ -3462,20 +3618,12 @@
           .querySelector('.lang-switch')
           ?.setAttribute('aria-label', currentLang === 'uk' ? 'Мова' : 'Language')
         document
-          .querySelector('.capitalpilot-preview')
+          .querySelector('.cp-visual')
           ?.setAttribute(
             'aria-label',
             currentLang === 'uk'
-              ? 'Попередній перегляд сторінки CapitalPilot'
-              : 'CapitalPilot landing page preview',
-          )
-        document
-          .querySelector('.capitalpilot-preview img')
-          ?.setAttribute(
-            'alt',
-            currentLang === 'uk'
-              ? 'Сторінка AI-асистента для трейдингу CapitalPilot'
-              : 'CapitalPilot AI trading assistant landing page',
+              ? 'Графік ризику та позицій CapitalPilot у реальному часі'
+              : 'CapitalPilot live risk and position chart',
           )
         document
           .querySelectorAll('.lang-opt')
