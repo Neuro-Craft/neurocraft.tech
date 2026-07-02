@@ -11,7 +11,7 @@ read this file first, then make the change.
 - A **single, self-contained marketing site** — everything lives in **`src/index.html`**
   (inline CSS + JS, no build step, no framework).
 - It's a tiny **hash-routed SPA**: a company hub at `#/` plus one "view" per product
-  (`#dovira`, `#dronesim`, …). Switching views is handled by a small router in the
+  (`#dovira`, `#maivo`, …). Switching views is handled by a small router in the
   inline `<script>` at the bottom of `src/index.html`.
 - **Contact/lead forms** POST to **`functions/api/contact.js`** — a Cloudflare Pages
   Function that emails submissions via **Resend**.
@@ -60,7 +60,7 @@ The accent array is `[hex, hex+"45", hex+"18"]` — the same hex with `45` / `18
 suffixes (8-digit hex). The router applies it to the whole view automatically.
 
 **3. Add the product's page** — copy an existing `<section class="view" data-view="…">`
-block (the **`dronesim`** one is the simplest template) and change `data-view="falcon"`,
+block (the **`maivo`** one is the simplest template) and change `data-view="falcon"`,
 the hero text, the feature cards, etc. Keep the `<a class="back-link" href="#/">← All
 products</a>` at the top.
 
@@ -87,7 +87,7 @@ If the new product page has a lead form, do three small things so its emails are
 3. **`functions/api/contact.js`** — add the email subject label to `LEAD_LABELS`:
    `'falcon-access': 'Falcon — Request Access',`
 
-Lead types already wired: `contact`, `dovira-access`, `dronesim-access`.
+Lead types already wired: `contact`, `dovira-access`, `maivo-access`.
 
 ---
 
@@ -95,7 +95,7 @@ Lead types already wired: `contact`, `dovira-access`, `dronesim-access`.
 
 All text is in `src/index.html`. Each product's page is under its
 `<section ... data-view="…">`. A highlighted word uses `<em>…</em>` (renders in the
-view's accent color). Example — the Drone Simulator slogan:
+view's accent color). Example — the Maivo slogan:
 `<h1>Practice real flight,<br /><em>risk-free.</em></h1>`.
 
 **English is the source of truth in the markup.** If you change or add any English copy,
@@ -134,8 +134,8 @@ Also update, when relevant:
 - **`TITLES_UK`** — the localized `<title>` per view (`home`, `dovira`, …).
 - **`LEAD_SUCCESS`** — form button success labels are `{ en, uk }` pairs.
 
-Deliberately **left in English**: brand/product names (Dovira, CapitalPilot, Drone
-Simulator), terminal/CLI output blocks, and HUD telemetry overlays.
+Deliberately **left in English**: brand/product names (Dovira, CapitalPilot, Maivo),
+terminal/CLI output blocks, and HUD telemetry overlays.
 
 ### Auto-detecting Ukrainian visitors
 
