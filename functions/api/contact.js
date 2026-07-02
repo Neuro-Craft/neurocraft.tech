@@ -4,7 +4,7 @@
 // Required env var (Pages project → Settings → Environment variables):
 //   RESEND_API_KEY   — your Resend API key
 // Optional overrides:
-//   CONTACT_TO       — recipient (default: dip00dip@gmail.com)
+//   CONTACT_TO       — recipient (default: contact@neurocraft.tech)
 //   CONTACT_FROM     — verified sender (default: NeuroCraft <onboarding@resend.dev>)
 
 const LEAD_LABELS = {
@@ -57,7 +57,7 @@ export async function onRequest({ request, env }) {
   // Strip accidental wrapping quotes / whitespace from env values — a common
   // mistake when pasting a `Name <email@domain>` value into the dashboard.
   const clean = (v, fallback) => (v || fallback).trim().replace(/^["']|["']$/g, '').trim()
-  const to = clean(env.CONTACT_TO, 'dip00dip@gmail.com')
+  const to = clean(env.CONTACT_TO, 'contact@neurocraft.tech')
   const from = clean(env.CONTACT_FROM, 'NeuroCraft <onboarding@resend.dev>')
 
   try {

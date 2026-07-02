@@ -33,7 +33,7 @@ Set these environment variables in the Pages project (Settings → Environment v
 | Variable | Required | Default | Notes |
 | --- | --- | --- | --- |
 | `RESEND_API_KEY` | yes | — | Your Resend API key. |
-| `CONTACT_TO` | no | `dip00dip@gmail.com` | Where submissions are delivered. |
+| `CONTACT_TO` | no | `contact@neurocraft.tech` | Where submissions are delivered. |
 | `CONTACT_FROM` | no | `NeuroCraft <onboarding@resend.dev>` | Sender, in `email@domain` or `Name <email@domain>` format. Use a Resend‑verified domain address once `neurocraft.tech` is verified. Enter the value **without** surrounding quotes, e.g. `NeuroCraft <hello@neurocraft.tech>`. |
 
 Until the domain is verified in Resend, the default `onboarding@resend.dev` sender
