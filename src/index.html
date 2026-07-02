@@ -503,20 +503,7 @@
       }
 
       .product-status {
-        font-family: var(--font-mono);
-        font-size: 0.55rem;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        padding: 0.25rem 0.6rem;
-        border-radius: 3px;
-      }
-      .product-status.live {
-        color: var(--card, var(--accent));
-        background: color-mix(in srgb, var(--card, var(--accent)) 14%, transparent);
-      }
-      .product-status.soon {
-        color: var(--text-dim);
-        border: 1px solid var(--border);
+        display: none;
       }
 
       .product-card h3 {
@@ -3120,7 +3107,7 @@
           (p, i) => `
         <a class="product-card reveal${i ? ` reveal-delay-${i}` : ''}" href="#${p.slug}" style="--card:${p.color}">
           <div class="product-card-top">
-            <span class="product-status ${p.status}">${p.status === 'live' ? 'Live' : 'Coming soon'}</span>
+            <span class="product-status ${p.status}">${p.status === 'live' ? 'Live' : 'Soon'}</span>
             <span class="product-index">${String(i + 1).padStart(2, '0')}</span>
           </div>
           <h3>${p.name}</h3>
@@ -3133,7 +3120,7 @@
         `
         <div class="product-card disabled reveal reveal-delay-${PRODUCTS.length}" style="--card:#44445a">
           <div class="product-card-top">
-            <span class="product-status soon">Coming soon</span>
+            <span class="product-status soon">Soon</span>
             <span class="product-index">+</span>
           </div>
           <h3>More to come</h3>
@@ -3372,6 +3359,7 @@
         // --- Product hub cards ---
         Live: 'Активний',
         'Coming soon': 'Незабаром',
+        Soon: 'Незабаром',
         'Explore →': 'Детальніше →',
         'More to come': 'Більше попереду',
         'New systems in the lab': 'Нові системи в лабораторії',
