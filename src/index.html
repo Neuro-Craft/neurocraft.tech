@@ -33,7 +33,6 @@
         --cyan: #00e5c7;
         --cyan-dim: #00e5c740;
         --cyan-glow: #00e5c718;
-        --hud-green: #7dff4d;
         --red-alert: #ff2d55;
         --red-dim: #ff2d5540;
         --amber: #ffb800;
@@ -1159,7 +1158,7 @@
         }
       }
 
-      /* ============ DRONE OSD / HUD VISUAL (green, fixed) ============ */
+      /* ============ DRONE OSD / HUD VISUAL (themed) ============ */
       .osd {
         position: relative;
         width: 100%;
@@ -1169,7 +1168,7 @@
         border: 1px solid var(--border);
         border-radius: 6px;
         background:
-          radial-gradient(circle at 50% 58%, rgba(125, 255, 77, 0.06), transparent 65%),
+          radial-gradient(circle at 50% 58%, var(--accent-glow), transparent 65%),
           var(--bg-deep);
         overflow: hidden;
         font-family: var(--font-mono);
@@ -1184,8 +1183,8 @@
           0deg,
           transparent,
           transparent 3px,
-          rgba(125, 255, 77, 0.03) 3px,
-          rgba(125, 255, 77, 0.03) 4px
+          var(--accent-glow) 3px,
+          var(--accent-glow) 4px
         );
         pointer-events: none;
       }
@@ -1195,8 +1194,8 @@
         font-size: 0.62rem;
         line-height: 1.6;
         letter-spacing: 0.1em;
-        color: var(--hud-green);
-        text-shadow: 0 0 8px rgba(125, 255, 77, 0.45);
+        color: var(--accent);
+        text-shadow: 0 0 8px var(--accent-dim);
       }
       .osd-corner.tl {
         top: 1rem;
@@ -1235,8 +1234,8 @@
         left: 14%;
         right: 14%;
         height: 1px;
-        background: var(--hud-green);
-        box-shadow: 0 0 8px rgba(125, 255, 77, 0.5);
+        background: var(--accent);
+        box-shadow: 0 0 8px var(--accent-dim);
         opacity: 0.55;
         animation: osd-tilt 7s ease-in-out infinite;
       }
@@ -1247,7 +1246,7 @@
         top: -3px;
         width: 1px;
         height: 7px;
-        background: var(--hud-green);
+        background: var(--accent);
       }
       .osd-horizon::before {
         left: 0;
@@ -1278,8 +1277,8 @@
       .osd-cross::after {
         content: '';
         position: absolute;
-        background: var(--hud-green);
-        box-shadow: 0 0 6px rgba(125, 255, 77, 0.5);
+        background: var(--accent);
+        box-shadow: 0 0 6px var(--accent-dim);
       }
       .osd-cross::before {
         left: 50%;
@@ -1302,7 +1301,7 @@
         right: 0;
         height: 28%;
         top: -28%;
-        background: linear-gradient(transparent, rgba(125, 255, 77, 0.07));
+        background: linear-gradient(transparent, var(--accent-glow));
         animation: osd-scanline 4.5s linear infinite;
       }
       @keyframes osd-scanline {
@@ -1311,7 +1310,7 @@
         }
       }
 
-      /* ============ CAPITALPILOT TRADING VISUAL (amber, themed) ============ */
+      /* ============ CAPITALPILOT TRADING VISUAL (green, themed) ============ */
       .cp-visual {
         position: relative;
         width: 100%;
@@ -2412,16 +2411,16 @@
     </section>
 
     <!-- ============================================================= -->
-    <!-- ========== VIEW: DRONE SIMULATOR ========== -->
+    <!-- ========== VIEW: MAIVO ========== -->
     <!-- ============================================================= -->
-    <section class="view" data-view="dronesim">
+    <section class="view" data-view="maivo">
       <div class="hero">
         <div class="hero-content">
           <div class="hero-left">
             <a class="back-link" href="#/">&larr; All products</a>
             <div class="hero-status">
               <div class="hero-status-dot"></div>
-              <span class="hero-status-text">Drone Simulator · Flight-true physics</span>
+              <span class="hero-status-text">Maivo · Flight-true physics</span>
             </div>
             <h1>Practice real flight,<br /><em>risk-free.</em></h1>
             <p class="hero-desc">
@@ -2430,7 +2429,7 @@
               multi-user sessions, then replay every flight.
             </p>
             <div class="hero-actions">
-              <a href="#drone-access" class="btn-primary">
+              <a href="#maivo-access" class="btn-primary">
                 <svg
                   width="14"
                   height="14"
@@ -2443,7 +2442,7 @@
                 </svg>
                 Request Access
               </a>
-              <a href="#drone-features" class="btn-secondary">See Features</a>
+              <a href="#maivo-features" class="btn-secondary">See Features</a>
             </div>
           </div>
           <div class="osd">
@@ -2458,8 +2457,8 @@
         </div>
       </div>
 
-      <!-- Drone features -->
-      <section id="drone-features">
+      <!-- Maivo features -->
+      <section id="maivo-features">
         <div class="section-inner">
           <div class="reveal">
             <div class="section-label">// Capabilities</div>
@@ -2604,18 +2603,18 @@
         </div>
       </section>
 
-      <!-- Drone CTA -->
-      <section class="cta-section" id="drone-access">
+      <!-- Maivo CTA -->
+      <section class="cta-section" id="maivo-access">
         <div class="section-inner">
           <div class="reveal">
             <div class="section-label">// Early Access</div>
             <h2 class="section-title">Get in the <em>cockpit</em></h2>
             <p class="section-desc">
-              Request access to the NeuroCraft Drone Simulator for training, research, or
+              Request access to Maivo for training, research, or
               competition.
             </p>
           </div>
-          <form class="cta-form reveal reveal-delay-2" data-lead="dronesim-access">
+          <form class="cta-form reveal reveal-delay-2" data-lead="maivo-access">
             <input
               type="text"
               class="hp"
@@ -2670,12 +2669,12 @@
             <svg class="cp-svg" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <defs>
                 <linearGradient id="cpArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#f5b84b" stop-opacity="0.3" />
-                  <stop offset="100%" stop-color="#f5b84b" stop-opacity="0" />
+                  <stop offset="0%" stop-color="#7dff4d" stop-opacity="0.3" />
+                  <stop offset="100%" stop-color="#7dff4d" stop-opacity="0" />
                 </linearGradient>
                 <radialGradient id="cpGlow" cx="52%" cy="40%" r="55%">
-                  <stop offset="0%" stop-color="#f5b84b" stop-opacity="0.12" />
-                  <stop offset="100%" stop-color="#f5b84b" stop-opacity="0" />
+                  <stop offset="0%" stop-color="#7dff4d" stop-opacity="0.12" />
+                  <stop offset="100%" stop-color="#7dff4d" stop-opacity="0" />
                 </radialGradient>
               </defs>
 
@@ -3073,10 +3072,10 @@
           tags: ['Detection', 'Forensics', 'Threat Intel'],
         },
         {
-          slug: 'dronesim',
-          name: 'Drone Simulator',
+          slug: 'maivo',
+          name: 'Maivo',
           status: 'live',
-          color: '#7dff4d',
+          color: '#f5b84b',
           tagline: 'Deterministic drone flight simulation',
           blurb:
             'Frame-exact flight physics, faithful real-world drone models, authentic OSD, networked multi-user sessions, and full replay.',
@@ -3086,7 +3085,7 @@
           slug: 'capitalpilot',
           name: 'CapitalPilot',
           status: 'live',
-          color: '#f5b84b',
+          color: '#7dff4d',
           tagline: 'AI trading assistant for Bybit bots',
           blurb:
             'A Chrome-extension trading companion for liquidation protection, position analysis, and safety-checked capital movement recommendations.',
@@ -3104,13 +3103,13 @@
           title: 'Dovira — Real-Time Deepfake & Narrative Detection',
           accent: ['#00e5c7', '#00e5c745', '#00e5c718'],
         },
-        dronesim: {
-          title: 'NeuroCraft Drone Simulator — Deterministic flight simulation',
-          accent: ['#7dff4d', '#7dff4d45', '#7dff4d18'],
+        maivo: {
+          title: 'Maivo — Deterministic flight simulation',
+          accent: ['#f5b84b', '#f5b84b45', '#f5b84b18'],
         },
         capitalpilot: {
           title: 'CapitalPilot — AI Trading Assistant by NeuroCraft',
-          accent: ['#f5b84b', '#f5b84b45', '#f5b84b18'],
+          accent: ['#7dff4d', '#7dff4d45', '#7dff4d18'],
         },
       }
 
@@ -3253,7 +3252,7 @@
       const LEAD_SUCCESS = {
         contact: { en: 'SENT ✓', uk: 'НАДІСЛАНО ✓' },
         'dovira-access': { en: 'REQUESTED ✓', uk: 'ЗАПИТ НАДІСЛАНО ✓' },
-        'dronesim-access': { en: 'REQUESTED ✓', uk: 'ЗАПИТ НАДІСЛАНО ✓' },
+        'maivo-access': { en: 'REQUESTED ✓', uk: 'ЗАПИТ НАДІСЛАНО ✓' },
         'capitalpilot-access': { en: 'REQUESTED ✓', uk: 'ЗАПИТ НАДІСЛАНО ✓' },
       }
 
@@ -3301,7 +3300,7 @@
       const TITLES_UK = {
         home: 'NeuroCraft — Нейронні системи для синтетичного світу',
         dovira: 'Dovira — Виявлення дипфейків і наративів у реальному часі',
-        dronesim: 'NeuroCraft Drone Simulator — Детермінована симуляція польоту',
+        maivo: 'Maivo — Детермінована симуляція польоту',
         capitalpilot: 'CapitalPilot — AI-асистент для трейдингу від NeuroCraft',
       }
 
@@ -3483,8 +3482,8 @@
         "Join our early access program and deploy Dovira's detection engine in your organization.":
           'Приєднуйтеся до програми раннього доступу та розгорніть рушій виявлення Dovira у вашій організації.',
 
-        // --- Drone Simulator ---
-        'Drone Simulator · Flight-true physics': 'Drone Simulator · Достовірна фізика польоту',
+        // --- Maivo ---
+        'Maivo · Flight-true physics': 'Maivo · Достовірна фізика польоту',
         'Practice real flight,': 'Практикуйте справжній політ,',
         'risk-free.': 'без ризику.',
         'A drone simulator with realistic, deterministic physics and faithful models of real-world airframes — from OSD to control response. Train solo or in networked multi-user sessions, then replay every flight.':
@@ -3514,8 +3513,8 @@
           'Записуйте й перемотуйте будь-яку сесію. Прокручуйте, переглядайте й аналізуйте кожен політ для тренувань, розборів і реконструкції інцидентів.',
         'Get in the': 'Сідайте в',
         cockpit: 'кабіну',
-        'Request access to the NeuroCraft Drone Simulator for training, research, or competition.':
-          'Запросіть доступ до NeuroCraft Drone Simulator для тренувань, досліджень або змагань.',
+        'Request access to Maivo for training, research, or competition.':
+          'Запросіть доступ до Maivo для тренувань, досліджень або змагань.',
 
         // --- CapitalPilot ---
         'CapitalPilot · AI trading assistant': 'CapitalPilot · AI-асистент для трейдингу',
